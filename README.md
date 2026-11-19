@@ -1,16 +1,14 @@
 # Abhishek & Valerie · Ceremony Music
 
-A static website (no server code, no build step). Upload this whole folder to any static host.
+A static website: no build step, no server code. Vercel, Netlify or GitHub Pages can host this repository as it is.
 
-## Host it (pick one)
-- **Netlify Drop:** go to https://app.netlify.com/drop and drag this folder onto the page. You get a link right away.
-- **GitHub Pages:** push these files to a repository, then Settings → Pages → deploy from the main branch.
-- **Vercel / Cloudflare Pages:** create a new project from this folder; there is no build command and the output directory is the folder itself.
-- **Your own computer:** run `python3 -m http.server 8000` in this folder and open http://localhost:8000.
+## Files
+- `index.html` — the player
+- `songs/` — every song the player uses. **Keep this folder name and these file names**, or the player can't find the music.
+  The 57-minute prelude is split into `guests-arriving-1/2/3.mp3` (each under GitHub's 25 MB upload limit); they play back to back.
+- `sw.js`, `manifest.webmanifest`, `icon.svg` — offline support and the home-screen icon
+- `Abhishek-Valerie-Ceremony-Music.html` — a separate single-file copy with every song built in, for opening directly on a laptop
 
-## Good to know
-- Songs you add are stored in that browser on that device (IndexedDB). They are never uploaded to the host.
-  Load the songs on the device you will use at the ceremony.
-- After the first visit the page works offline, so venue Wi-Fi doesn't matter.
-  On a phone you can also "Add to Home Screen" to open it like an app.
-- Keyboard: Space = Go (next cue), Esc = fade out.
+## On the day
+- Open the site once on the ceremony device while on Wi-Fi and leave it open a few minutes so the songs download for offline use.
+- Space plays the next song, Esc fades out.

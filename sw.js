@@ -1,12 +1,12 @@
 // Keeps the site and its songs available with no internet at the venue.
-const CACHE = "av-ceremony-v17";
+const CACHE = "av-ceremony-v21";
 const CORE = ["./", "index.html", "manifest.webmanifest", "icon.svg"];
-const SONGS = ["songs/guests-arriving.mp3", "songs/abhishek-in-christ-alone.mp3", "songs/groomsmen-gratitude.mp3", "songs/valerie-goodness-of-god.mp3", "songs/signing-way-maker.mp3", "songs/bridesmaids-the-blessing.mp3", "songs/postlude-haazir.mp3", "songs/abhishek-sand-drawing.mp3", "songs/recessional-gawahi.mp3", "songs/postlude-washed.mp3", "songs/congratulations.mp3"];
+const SONGS = ["songs/abhishek-in-christ-alone.mp3", "songs/abhishek-sand-drawing.mp3", "songs/bridesmaids-the-blessing.mp3", "songs/congratulations.mp3", "songs/groomsmen-gratitude.mp3", "songs/guests-arriving-1.mp3", "songs/guests-arriving-2.mp3", "songs/guests-arriving-3.mp3", "songs/postlude-haazir.mp3", "songs/postlude-washed.mp3", "songs/recessional-gawahi.mp3", "songs/signing-way-maker.mp3", "songs/valerie-goodness-of-god.mp3"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(async c => {
-    await c.addAll(CORE);
+    await c.addAll(CORE.map(u => new Request(u, { cache: "reload" })));
     // Songs are large: cache each one on its own so one slow download can't block the rest.
-    await Promise.all(SONGS.map(s => c.add(s).catch(() => {})));
+    await Promise.all(SONGS.map(s => c.add(new Request(s, { cache: "reload" })).catch(() => {})));
   }));
   self.skipWaiting();
 });
@@ -14,19 +14,18 @@ self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Pr
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
-  // Audio: serve from cache first (supports seeking via full cached file), fall back to network.
+  // Audio: serve from cache when available (with range support for seeking), otherwise from the network.
   if (url.pathname.includes("/songs/")) {
     e.respondWith(caches.open(CACHE).then(async c => {
       const hit = await c.match(url.pathname.replace(/^.*\/songs\//, "songs/")) || await c.match(e.request, { ignoreSearch: true });
-      if (hit && !e.request.headers.get("range")) return hit;
-      if (hit && e.request.headers.get("range")) {
-        const buf = await hit.arrayBuffer();
-        const m = /bytes=(\d+)-(\d*)/.exec(e.request.headers.get("range"));
-        const start = +m[1], end = m[2] ? +m[2] : buf.byteLength - 1;
-        return new Response(buf.slice(start, end + 1), { status: 206, headers: {
-          "Content-Type": "audio/mpeg", "Content-Range": `bytes ${start}-${end}/${buf.byteLength}`, "Content-Length": String(end - start + 1), "Accept-Ranges": "bytes" } });
-      }
-      return fetch(e.request);
+      if (!hit) return fetch(e.request);
+      const range = e.request.headers.get("range");
+      if (!range) return hit;
+      const buf = await hit.arrayBuffer();
+      const m = /bytes=(\d+)-(\d*)/.exec(range);
+      const start = +m[1], end = m[2] ? +m[2] : buf.byteLength - 1;
+      return new Response(buf.slice(start, end + 1), { status: 206, headers: {
+        "Content-Type": "audio/mpeg", "Content-Range": `bytes ${start}-${end}/${buf.byteLength}`, "Content-Length": String(end - start + 1), "Accept-Ranges": "bytes" } });
     }));
     return;
   }

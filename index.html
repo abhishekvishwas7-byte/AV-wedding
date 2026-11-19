@@ -271,7 +271,9 @@ ol.cues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 (() => {
 /* Songs that ship with the site, so they're ready on any device */
 const SONGS = {
-  "guests-arrive": {song:"So Come Holy Spirit – Instrumental", src:"songs/guests-arriving.mp3", fileName:"So Come Holy Spirit.mp3", duration:3454.1},
+  "guests-1": {song:"So Come Holy Spirit – part 1", src:"songs/guests-arriving-1.mp3", fileName:"So Come Holy Spirit part 1.mp3", duration:1141.3},
+  "guests-2": {song:"So Come Holy Spirit – part 2", src:"songs/guests-arriving-2.mp3", fileName:"So Come Holy Spirit part 2.mp3", duration:1158.3},
+  "guests-3": {song:"So Come Holy Spirit – part 3", src:"songs/guests-arriving-3.mp3", fileName:"So Come Holy Spirit part 3.mp3", duration:1154.5},
   "abhishek-entrance": {song:"In Christ Alone – Instrumental Worship", src:"songs/abhishek-in-christ-alone.mp3", fileName:"In Christ Alone (Instrumental Worship).mp3", duration:202.7},
   "abhishek-entrance-2": {song:"Sand Drawing – Judah Earl", src:"songs/abhishek-sand-drawing.mp3", fileName:"Sand Drawing – Judah Earl.mp3", duration:208.5},
   "groomsmen-entrance": {song:"Gratitude – Instrumental Worship", src:"songs/groomsmen-gratitude.mp3", fileName:"Gratitude (Instrumental Worship).mp3", duration:291.5},
@@ -285,6 +287,8 @@ const SONGS = {
 };
 /* A moment can play several songs in a row ("tracks") */
 const SET = keys => { const t=keys.map(k=>({...SONGS[k]})); return {tracks:t, song:t.map(x=>x.song.split(" – ")[0]).join(" + "), src:t[0].src, fileName:`${t.length} songs, played in order`, duration:t.reduce((a,x)=>a+x.duration,0)}; };
+/* The 57-minute prelude is stored in three parts (each under GitHub's 25 MB upload limit) that play back to back */
+SONGS["guests-arrive"]={...SET(["guests-1","guests-2","guests-3"]), song:"So Come Holy Spirit – Instrumental", fileName:"So Come Holy Spirit · 57 min in 3 parts"};
 const DEFAULTS = [
   {id:"guests-arrive", moment:"Guests arrive", suggest:"Soft instrumental playlist", fadeIn:3, fadeOut:6, loop:true, ...SONGS["guests-arrive"]},
   {id:"groomsmen-entrance", moment:"Groomsmen walk in", suggest:"Song name", fadeIn:2, fadeOut:5, ...SONGS["groomsmen-entrance"]},
@@ -326,8 +330,41 @@ const rubberband=(o,dim,c=.55)=>(o*dim*c)/(dim+c*Math.abs(o));
 /* ---------- audio ---------- */
 let ctx=null,master=null,deck=null,nextIdx=0;
 const volume=()=>Math.pow($("#vol").value/100,1.6);
-function ensureCtx(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; ctx=new AC(); master=ctx.createGain(); master.gain.value=volume(); master.connect(ctx.destination);} if(ctx.state==="suspended") ctx.resume(); return ctx; }
+function ensureCtx(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; try{ if(navigator.audioSession) navigator.audioSession.type="playback"; }catch(e){}
+    try{ ctx=new AC({latencyHint:"playback"}); }catch(e){ ctx=new AC(); }
+    master=ctx.createGain(); master.gain.value=volume();
+    /* Safety limiter: catches any peak before it can clip and crackle */
+    const lim=ctx.createDynamicsCompressor();
+    lim.threshold.value=-2; lim.knee.value=0; lim.ratio.value=20; lim.attack.value=.002; lim.release.value=.15;
+    master.connect(lim); lim.connect(ctx.destination);} if(ctx.state==="suspended") ctx.resume(); return ctx; }
 
+/* Songs can also be built into the page itself (single-file version), as text/plain script tags holding base64 audio */
+const embedded={};
+async function resolveSrc(src){
+  if(!src||src.startsWith("blob:")) return src;
+  if(embedded[src]) return embedded[src];
+  const tag=document.querySelector(`script[data-song="${src}"]`); if(!tag) return src;
+  const b64=tag.textContent.replace(/\s+/g,""), bin=atob(b64), bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return embedded[src]=URL.createObjectURL(new Blob([bytes],{type:tag.dataset.type||"audio/mpeg"}));
+}
+/* Unpack built-in songs in the background so the first press of Play next is instant */
+addEventListener("load",()=>{ const tags=[...document.querySelectorAll("script[data-song]")]; if(!tags.length) return;
+  const ty=tags[0].dataset.type; if(ty && !new Audio().canPlayType(ty)){ toast("This browser can't play the built-in songs. Open this file in Chrome, Edge or Firefox."); return; }
+  let i=0; const next=()=>{ if(i>=tags.length) return; resolveSrc(tags[i++].dataset.song).then(()=>setTimeout(next,50)); }; setTimeout(next,500); });
+const loadError=src=>src&&src.startsWith("songs/")
+  ? `Couldn't load ${src}. Make sure the songs folder is uploaded next to index.html.`
+  : "Couldn't play this song file. Try adding it again from Options.";
+function wire(d,el){
+  el.addEventListener("ended",()=>{
+    if(deck!==d||d.el!==el) return;
+    const tr=d.cue.tracks;
+    if(tr){ const nx=d.track+1; if(nx<tr.length) return switchTrack(d,nx); if(d.cue.loop) return switchTrack(d,0); }
+    stopDeck(d);
+  });
+  el.addEventListener("play",updateDeck); el.addEventListener("pause",updateDeck);
+  el.addEventListener("error",()=>{ if(deck===d&&d.el===el) toast(loadError(el.dataset.src)); });
+}
 async function playCue(i,track=0){
   const cue=cues[i]; if(!cue) return;
   if(!cue.fileName){ toast(`Add a song to “${cue.moment}” first`); return; }
@@ -344,27 +381,38 @@ async function playCue(i,track=0){
   ensureCtx();
   if(deck) fadeOutDeck(deck,Math.min(deck.cue.fadeOut||2,4));
   const el=new Audio();
-  el.src=url; el.loop=tracks?false:!!cue.loop; el.preload="auto";
+  el.dataset.src=url; el.src=await resolveSrc(url); el.loop=tracks?false:!!cue.loop; el.preload="auto";
   const gain=ctx.createGain(); ctx.createMediaElementSource(el).connect(gain); gain.connect(master);
-  const d={cue,el,gain,url,fading:false,autoFade:false,track:tracks?track:0};
+  const d={cue,el,gain,url,fading:false,autoFade:false,track:tracks?track:0,pre:null};
   const fi=Math.max(0,+cue.fadeIn||0);
   gain.gain.setValueAtTime(fi>0?.0001:1,ctx.currentTime);
   el.addEventListener("loadedmetadata",()=>{ if(track===0&&cue.startAt>0&&cue.startAt<el.duration) el.currentTime=cue.startAt; },{once:true});
-  el.addEventListener("ended",()=>{
-    if(deck!==d) return;
-    if(tracks){ const nx=d.track+1; if(nx<tracks.length) return switchTrack(d,nx); if(cue.loop) return switchTrack(d,0); }
-    stopDeck(d);
-  });
-  el.addEventListener("play",updateDeck); el.addEventListener("pause",updateDeck);
-  try{ await el.play(); }catch(e){ URL.revokeObjectURL(url); toast("Your browser paused the music. Tap Play next to start it."); return; }
+  wire(d,el);
+  try{ await el.play(); }
+  catch(e){ if(url.startsWith("blob:")) URL.revokeObjectURL(url); toast(e&&e.name==="NotAllowedError"?"Your browser blocked the sound. Tap Play next again.":loadError(url)); return; }
   if(fi>0) gain.gain.exponentialRampToValueAtTime(1,ctx.currentTime+fi);
-  deck=d; nextIdx=i+1; requestWake(); render();
+  deck=d; nextIdx=i+1; requestWake(); render(); preloadNext(d);
 }
-function switchTrack(d,k){
+/* Load the next part ahead of time so it starts the instant the current one ends */
+async function preloadNext(d){
+  const tr=d.cue.tracks; if(!tr||tr.length<2) return;
+  let k=d.track+1; if(k>=tr.length){ if(!d.cue.loop) return; k=0; }
+  const el=new Audio(); el.preload="auto"; el.dataset.src=tr[k].src; el.src=await resolveSrc(tr[k].src); el.load();
+  d.pre={k,el};
+}
+async function switchTrack(d,k){
   const t=d.cue.tracks&&d.cue.tracks[k]; if(!t||d.fading) return;
-  d.track=k; d.autoFade=false; d.el.src=t.src;
+  let el;
+  if(d.pre&&d.pre.k===k) el=d.pre.el;
+  else{ el=new Audio(); el.preload="auto"; el.dataset.src=t.src; el.src=await resolveSrc(t.src); }
+  d.pre=null;
+  ctx.createMediaElementSource(el).connect(d.gain);
+  wire(d,el);
+  const old=d.el; d.el=el; d.track=k; d.autoFade=false;
   d.gain.gain.cancelScheduledValues(ctx.currentTime); d.gain.gain.setValueAtTime(1,ctx.currentTime);
-  d.el.play().catch(()=>{}); render();
+  try{ await el.play(); }catch(e){ toast(loadError(t.src)); }
+  old.pause();
+  render(); preloadNext(d);
 }
 const nowLabel=d=>d.cue.tracks&&d.cue.tracks[d.track]?d.cue.tracks[d.track].song:label(d.cue);
 function fadeOutDeck(d,secs){
@@ -485,8 +533,9 @@ track.addEventListener("pointerup",endScrub); track.addEventListener("pointercan
 track.addEventListener("keydown",e=>{ if(!live()) return; if(e.key==="ArrowRight"){deck.el.currentTime+=5;e.preventDefault();} if(e.key==="ArrowLeft"){deck.el.currentTime-=5;e.preventDefault();} });
 
 let lastSec=-1, lastBlink=null;
-function tick(){
-  if(live()&&!scrub){
+let lastPaint=0;
+function tick(now){
+  if(live()&&!scrub&&now-lastPaint>200){ lastPaint=now;
     const el=deck.el,d=el.duration||0,t=el.currentTime;
     if(d) showFrac(t/d,d);
     track.setAttribute("aria-valuenow",d?Math.round(t/d*100):0);
@@ -701,6 +750,7 @@ openDB().then(async db=>{
       if(rc){ if(!rc.fileName){ Object.assign(rc,SONGS["recessional"]); if(/^just married$/i.test(rc.moment.trim())) rc.moment="Recessional · just married"; } }
       else{ const pi=cues.findIndex(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment)); cues.splice(pi>=0?pi:cues.length,0,fresh("recessional")); }
     }
+    cues.forEach(c=>{ if(!c.tracks && c.src==="songs/guests-arriving.mp3"){ const lp=c.loop; Object.assign(c,SONGS["guests-arrive"]); c.tracks=c.tracks.map(o=>({...o})); c.loop=lp; } });
     if(!(await kvGet("postlude-order-v2"))){
       const pl=cues.find(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment));
       if(pl && pl.tracks && pl.tracks.length===2 && pl.tracks[0].src===SONGS["postlude"].src && pl.tracks[1].src===SONGS["postlude-2"].src){
