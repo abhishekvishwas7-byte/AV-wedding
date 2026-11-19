@@ -283,6 +283,7 @@ const SONGS = {
   "recessional": {song:"Gawahi (Live) – Bridge Music", src:"songs/recessional-gawahi.mp3", fileName:"Gawahi (Live) – Bridge Music.mp3", duration:285.5},
   "postlude-2": {song:"Washed – Elevation Rhythm", src:"songs/postlude-washed.mp3", fileName:"Washed – Elevation Rhythm.mp3", duration:240.5},
   "congratulations": {song:"Congratulations and Celebration", src:"songs/congratulations.mp3", fileName:"Congratulations and Celebration.mp3", duration:177.3},
+  "first-dance": {song:"I Think They Call This Love – Elliot James Reay", src:"songs/first-dance.mp3", fileName:"I Think They Call This Love – Elliot James Reay.mp3", duration:135.0},
   "signing": {song:"Way Maker – Instrumental Worship", src:"songs/signing-way-maker.mp3", fileName:"Way Maker (Instrumental Worship).mp3", duration:234.2},
 };
 /* A moment can play several songs in a row ("tracks") */
@@ -299,6 +300,7 @@ const DEFAULTS = [
   {id:"congratulations", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["congratulations"]},
   {id:"recessional", moment:"Recessional · just married", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["recessional"]},
   {id:"postlude", moment:"Guests head out", suggest:"Song name", fadeIn:3, fadeOut:8, loop:true, ...SET(["postlude-2","postlude"])},
+  {id:"first-dance", moment:"First dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["first-dance"]},
 ];
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,10);
@@ -391,28 +393,31 @@ async function playCue(i,track=0){
   try{ await el.play(); }
   catch(e){ if(url.startsWith("blob:")) URL.revokeObjectURL(url); toast(e&&e.name==="NotAllowedError"?"Your browser blocked the sound. Tap Play next again.":loadError(url)); return; }
   if(fi>0) gain.gain.exponentialRampToValueAtTime(1,ctx.currentTime+fi);
-  deck=d; nextIdx=i+1; requestWake(); render(); preloadNext(d);
+  deck=d; nextIdx=i+1; requestWake(); render();
 }
 /* Load the next part ahead of time so it starts the instant the current one ends */
 async function preloadNext(d){
-  const tr=d.cue.tracks; if(!tr||tr.length<2) return;
+  const tr=d.cue.tracks; if(!tr||tr.length<2||d.pre||d.preloading) return;
+  d.preloading=true;
   let k=d.track+1; if(k>=tr.length){ if(!d.cue.loop) return; k=0; }
   const el=new Audio(); el.preload="auto"; el.dataset.src=tr[k].src; el.src=await resolveSrc(tr[k].src); el.load();
+  d.preloading=false;
+  if(deck!==d||d.fading){ release(el); return; }
   d.pre={k,el};
 }
 async function switchTrack(d,k){
   const t=d.cue.tracks&&d.cue.tracks[k]; if(!t||d.fading) return;
   let el;
   if(d.pre&&d.pre.k===k) el=d.pre.el;
-  else{ el=new Audio(); el.preload="auto"; el.dataset.src=t.src; el.src=await resolveSrc(t.src); }
+  else{ if(d.pre) release(d.pre.el); el=new Audio(); el.preload="auto"; el.dataset.src=t.src; el.src=await resolveSrc(t.src); }
   d.pre=null;
   ctx.createMediaElementSource(el).connect(d.gain);
   wire(d,el);
   const old=d.el; d.el=el; d.track=k; d.autoFade=false;
   d.gain.gain.cancelScheduledValues(ctx.currentTime); d.gain.gain.setValueAtTime(1,ctx.currentTime);
   try{ await el.play(); }catch(e){ toast(loadError(t.src)); }
-  old.pause();
-  render(); preloadNext(d);
+  release(old);
+  render();
 }
 const nowLabel=d=>d.cue.tracks&&d.cue.tracks[d.track]?d.cue.tracks[d.track].song:label(d.cue);
 function fadeOutDeck(d,secs){
@@ -422,7 +427,9 @@ function fadeOutDeck(d,secs){
   setTimeout(()=>stopDeck(d),s*1000+80);
   if(deck===d) render();
 }
-function stopDeck(d){ d.el.pause(); URL.revokeObjectURL(d.url); try{d.gain.disconnect();}catch(e){} if(deck===d){ deck=null; render(); if(nextLoaded()<0 && cues.some(c=>c.fileName)) toast("That's the last song. Congratulations, you two!"); } }
+/* Stop an audio element and abort its download, so browsers' per-site connection limit never blocks the next song */
+function release(el){ if(!el) return; try{ el.pause(); el.removeAttribute("src"); el.load(); }catch(e){} }
+function stopDeck(d){ release(d.el); if(d.pre){ release(d.pre.el); d.pre=null; } if(d.url&&d.url.startsWith("blob:")) URL.revokeObjectURL(d.url); try{d.gain.disconnect();}catch(e){} if(deck===d){ deck=null; render(); if(nextLoaded()<0 && cues.some(c=>c.fileName)) toast("That's the last song. Congratulations, you two!"); } }
 const live=()=>deck&&!deck.fading;
 function nextLoaded(){ for(let i=nextIdx;i<cues.length;i++) if(cues[i].fileName) return i; return -1; }
 function go(){
@@ -541,6 +548,7 @@ function tick(now){
     track.setAttribute("aria-valuenow",d?Math.round(t/d*100):0);
     const left=el.loop?t:d-t, sec=Math.floor(left), blink=!el.paused;
     if(sec!==lastSec||blink!==lastBlink){ setClock(left,blink); lastSec=sec; lastBlink=blink; }
+    if(deck.cue.tracks && d && d-t<45) preloadNext(deck); /* load the next part only near the end */
     const fo=+deck.cue.fadeOut||0;
     const endsHere=deck.cue.tracks?(deck.track===deck.cue.tracks.length-1&&!deck.cue.loop):!el.loop;
     if(endsHere&&d&&fo>0&&d-t<=fo&&!deck.autoFade){ deck.autoFade=true; fadeOutDeck(deck,d-t); }
@@ -751,6 +759,7 @@ openDB().then(async db=>{
       else{ const pi=cues.findIndex(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment)); cues.splice(pi>=0?pi:cues.length,0,fresh("recessional")); }
     }
     cues.forEach(c=>{ if(!c.tracks && c.src==="songs/guests-arriving.mp3"){ const lp=c.loop; Object.assign(c,SONGS["guests-arrive"]); c.tracks=c.tracks.map(o=>({...o})); c.loop=lp; } });
+    if(!(await kvGet("seeded-first-dance")) && !cues.some(c=>c.id==="first-dance"||/first dance/i.test(c.moment))) cues.push(fresh("first-dance"));
     if(!(await kvGet("postlude-order-v2"))){
       const pl=cues.find(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment));
       if(pl && pl.tracks && pl.tracks.length===2 && pl.tracks[0].src===SONGS["postlude"].src && pl.tracks[1].src===SONGS["postlude-2"].src){
@@ -783,7 +792,7 @@ openDB().then(async db=>{
     }
     save(); render();
   }
-  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1);
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1);
   ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
 });
 })();
