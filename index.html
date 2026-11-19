@@ -79,6 +79,10 @@ html{scrollbar-width:thin;scrollbar-color:rgba(200,255,0,.45) transparent}
 @keyframes stamp-in{0%{opacity:0;transform:translateY(-50%) rotate(-6deg) scale(1.35)}to{opacity:1;transform:translateY(-50%) rotate(-6deg) scale(1)}}
 
 /* Running order */
+.sec-label{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:18px 4px 2px;border-bottom:2px solid var(--w08)}
+.sec-label:first-child{padding-top:0}
+.sec-label h3{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(28px,3.4vw,40px);line-height:1;text-transform:uppercase;letter-spacing:.01em;color:var(--lime)}
+.sec-label span{font-size:.8125rem;color:var(--w30);font-variant-numeric:tabular-nums;white-space:nowrap}
 .list-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 24px;flex-wrap:wrap}
 .hint{font-size:.875rem;color:var(--w30)}
 ol.cues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
@@ -302,12 +306,12 @@ const DEFAULTS = [
   {id:"congratulations", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["congratulations"]},
   {id:"recessional", moment:"Recessional · just married", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["recessional"]},
   {id:"postlude", moment:"Guests head out", suggest:"Song name", fadeIn:3, fadeOut:8, loop:true, ...SET(["postlude-2","postlude"])},
-  {id:"reception-entry", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-1","reception-2"]), song:"Deewana + Naya Savera"},
-  {id:"first-dance", moment:"First dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["first-dance"]},
+  {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-1","reception-2"]), song:"Deewana + Naya Savera"},
+  {id:"first-dance", section:"reception", moment:"First dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["first-dance"]},
 ];
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,10);
-const freshCues = () => DEFAULTS.map(d => ({id:d.id||uid(), moment:d.moment, song:d.song||"", suggest:d.suggest, fadeIn:d.fadeIn, fadeOut:d.fadeOut, startAt:0, loop:!!d.loop, fileName:d.fileName||"", duration:d.duration||0, src:d.src||"", ...(d.choices?{choices:d.choices.map(o=>({...o})), pick:d.pick}:{}), ...(d.tracks?{tracks:d.tracks.map(o=>({...o}))}:{})}));
+const freshCues = () => DEFAULTS.map(d => ({id:d.id||uid(), ...(d.section?{section:d.section}:{}), moment:d.moment, song:d.song||"", suggest:d.suggest, fadeIn:d.fadeIn, fadeOut:d.fadeOut, startAt:0, loop:!!d.loop, fileName:d.fileName||"", duration:d.duration||0, src:d.src||"", ...(d.choices?{choices:d.choices.map(o=>({...o})), pick:d.pick}:{}), ...(d.tracks?{tracks:d.tracks.map(o=>({...o}))}:{})}));
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 /* ---------- storage ---------- */
@@ -459,9 +463,13 @@ const ti=open=>open?"":'tabindex="-1"';
 function render(){
   const a=document.activeElement,fid=a&&a.id,sel=[a&&a.selectionStart,a&&a.selectionEnd];
   const n=nextLoaded();
+  const firstRec=cues.findIndex(c=>c.section==="reception");
+  const recCount=firstRec<0?0:cues.length-firstRec, cerCount=cues.length-recCount;
+  const secHead=(name,count,from)=>`<li class="sec-label" role="presentation"><h3>${name}</h3><span>${count} ${count===1?"moment":"moments"}${count?` · from ${from}`:""}</span></li>`;
   $("#cues").innerHTML=cues.map((c,i)=>{
     const playing=live()&&deck.cue.id===c.id, open=openIds.has(c.id);
-    return `<li class="cue ${c.fileName?"loaded":""} ${playing?"playing":""} ${!playing&&i===n?"up-next":""}" data-id="${c.id}">
+    const head=(i===0&&firstRec!==0?secHead("Ceremony",cerCount,1):"")+(i===firstRec?secHead("Reception",recCount,i+1):"");
+    return head+`<li class="cue ${c.fileName?"loaded":""} ${playing?"playing":""} ${!playing&&i===n?"up-next":""}" data-id="${c.id}">
       <div class="row">
         <button class="handle" id="h-${c.id}" aria-label="Move ${esc(c.moment)}. Hold Alt and press the arrow keys.">${GRIP}</button>
         <div class="num">${i+1}</div>
@@ -563,7 +571,7 @@ function tick(now){
 let drag=null;
 $("#cues").addEventListener("pointerdown",e=>{
   const h=e.target.closest(".handle"); if(!h||e.button>0) return; e.preventDefault();
-  const li=h.closest(".cue"),items=[...$("#cues").children],idx=items.indexOf(li),rects=items.map(x=>x.getBoundingClientRect());
+  const li=h.closest(".cue"),items=[...$("#cues").querySelectorAll(".cue")],idx=items.indexOf(li),rects=items.map(x=>x.getBoundingClientRect());
   const gap=rects.length>1?rects[1].top-rects[0].bottom:12;
   h.setPointerCapture(e.pointerId); li.classList.add("lift"); items.forEach(x=>x!==li&&x.classList.add("shift"));
   drag={h,li,items,rects,gap,idx,target:idx,y0:e.clientY,dy:0,hist:[{y:e.clientY,t:performance.now()}]};
@@ -591,6 +599,10 @@ $("#cues").addEventListener("pointerup",e=>{ if(drag&&e.target===drag.h) endDrag
 $("#cues").addEventListener("pointercancel",()=>endDrag());
 function moveCue(from,to){
   const [c]=cues.splice(from,1); cues.splice(to,0,c);
+  const prev=cues[to-1], next=cues[to+1];
+  const ps=!!prev&&prev.section==="reception", ns=!!next&&next.section==="reception";
+  const rec=(prev&&next&&ps!==ns)?c.section==="reception":(prev?ps:ns); /* at the boundary a card keeps its own section */
+  if(rec) c.section="reception"; else delete c.section;
   if(deck) nextIdx=cues.indexOf(deck.cue)+1;
   save(); render();
   if(document.activeElement&&document.activeElement.classList.contains("handle")){ const h=document.getElementById("h-"+c.id); h&&h.focus(); }
@@ -667,6 +679,7 @@ $("#pauseBtn").addEventListener("click",()=>{ if(!live()) return; deck.el.paused
 $("#vol").addEventListener("input",()=>{ if(master) master.gain.setTargetAtTime(volume(),ctx.currentTime,.05); try{localStorage.setItem("av-vol",$("#vol").value);}catch(e){} });
 $("#addCue").addEventListener("click",()=>{
   const c={id:uid(),moment:"New moment",song:"",suggest:"Song name",fadeIn:2,fadeOut:5,startAt:0,loop:false,fileName:"",duration:0};
+  if(cues.length&&cues[cues.length-1].section==="reception") c.section="reception";
   cues.push(c); save(); render();
   const li=document.querySelector(`[data-id="${c.id}"]`);
   if(li&&!reduceMotion.matches){ li.style.opacity="0"; spring({from:16,to:0,response:.4,onUpdate:y=>{li.style.transform=`translateY(${y}px)`;li.style.opacity=String(1-y/16);},onDone:()=>{li.style.transform="";li.style.opacity="";}}); }
@@ -769,6 +782,10 @@ openDB().then(async db=>{
     }
     { const bySrc={}; Object.values(SONGS).forEach(o=>{ if(o.src&&!o.tracks) bySrc[o.src]=o.duration; });
       cues.forEach(c=>{ if(bySrc[c.src]) c.duration=bySrc[c.src]; (c.choices||[]).concat(c.tracks||[]).forEach(o=>{ if(bySrc[o.src]) o.duration=bySrc[o.src]; }); if(c.tracks) c.duration=c.tracks.reduce((x,o)=>x+o.duration,0); }); }
+    if(!(await kvGet("sections-v1"))){
+      const fi=cues.findIndex(c=>c.id==="reception-entry"||/reception/i.test(c.moment));
+      if(fi>=0) cues.forEach((c,k)=>{ if(k>=fi) c.section="reception"; });
+    }
     if(!(await kvGet("postlude-order-v2"))){
       const pl=cues.find(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment));
       if(pl && pl.tracks && pl.tracks.length===2 && pl.tracks[0].src===SONGS["postlude"].src && pl.tracks[1].src===SONGS["postlude-2"].src){
@@ -801,7 +818,7 @@ openDB().then(async db=>{
     }
     save(); render();
   }
-  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1);
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1);
   ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
 });
 })();

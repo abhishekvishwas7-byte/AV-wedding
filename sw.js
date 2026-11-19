@@ -1,5 +1,5 @@
 // Keeps the site and its songs available with no internet at the venue.
-const CACHE = "av-ceremony-v28";
+const CACHE = "av-ceremony-v29";
 const CORE = ["./", "index.html", "manifest.webmanifest", "icon.svg"];
 const SONGS = ["songs/abhishek-in-christ-alone.mp3", "songs/abhishek-sand-drawing.mp3", "songs/bridesmaids-the-blessing.mp3", "songs/congratulations.mp3", "songs/first-dance.mp3", "songs/groomsmen-gratitude.mp3", "songs/guests-arriving-1.mp3", "songs/guests-arriving-2.mp3", "songs/guests-arriving-3.mp3", "songs/postlude-haazir.mp3", "songs/postlude-washed.mp3", "songs/reception-deewana.mp3", "songs/reception-naya-savera.mp3", "songs/recessional-gawahi.mp3", "songs/signing-way-maker.mp3", "songs/valerie-goodness-of-god.mp3"];
 self.addEventListener("install", e => {
