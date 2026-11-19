@@ -306,7 +306,7 @@ const DEFAULTS = [
   {id:"congratulations", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["congratulations"]},
   {id:"recessional", moment:"Recessional · just married", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["recessional"]},
   {id:"postlude", moment:"Guests head out", suggest:"Song name", fadeIn:3, fadeOut:8, loop:true, ...SET(["postlude-2","postlude"])},
-  {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-1","reception-2"]), song:"Deewana + Naya Savera"},
+  {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-2","reception-1"]), song:"Naya Savera + Deewana"},
   {id:"first-dance", section:"reception", moment:"First dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["first-dance"]},
 ];
 const $ = s => document.querySelector(s);
@@ -782,6 +782,12 @@ openDB().then(async db=>{
     }
     { const bySrc={}; Object.values(SONGS).forEach(o=>{ if(o.src&&!o.tracks) bySrc[o.src]=o.duration; });
       cues.forEach(c=>{ if(bySrc[c.src]) c.duration=bySrc[c.src]; (c.choices||[]).concat(c.tracks||[]).forEach(o=>{ if(bySrc[o.src]) o.duration=bySrc[o.src]; }); if(c.tracks) c.duration=c.tracks.reduce((x,o)=>x+o.duration,0); }); }
+    if(!(await kvGet("reception-order-v2"))){
+      const re=cues.find(c=>c.id==="reception-entry");
+      if(re&&re.tracks&&re.tracks.length===2&&re.tracks[0].src===SONGS["reception-1"].src&&re.tracks[1].src===SONGS["reception-2"].src){
+        re.tracks.reverse(); re.src=re.tracks[0].src; if(re.song==="Deewana + Naya Savera") re.song="Naya Savera + Deewana";
+      }
+    }
     if(!(await kvGet("sections-v1"))){
       const fi=cues.findIndex(c=>c.id==="reception-entry"||/reception/i.test(c.moment));
       if(fi>=0) cues.forEach((c,k)=>{ if(k>=fi) c.section="reception"; });
@@ -818,7 +824,7 @@ openDB().then(async db=>{
     }
     save(); render();
   }
-  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1);
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1);
   ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
 });
 })();
