@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="The ceremony soundtrack for Abhishek &amp; Valerie's wedding.">
+<meta name="theme-color" content="#070707">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>html,body{margin:0}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Abhishek &amp; Valerie Ceremony Music</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one dark stage. Giant lime wordmark splash, an On Air deck (live + next), the running order as outlined cards, and a fixed control bar at the bottom. Deliberately single-theme. */
+:root{
+  --ink:#070707; --panel:#0f0f0f; --lime:#c8ff00; --white:#ffffff;
+  --w65:rgba(255,255,255,.65); --w55:rgba(255,255,255,.55); --w30:rgba(255,255,255,.3);
+  --w15:rgba(255,255,255,.15); --w08:rgba(255,255,255,.08); --danger:#ff6a4d;
+  --display:"Anton","Arial Narrow",Impact,sans-serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --bar-h:150px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ink);color:var(--white);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ink)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-user-select:none;user-select:none}
+:focus-visible{outline:2px solid var(--lime);outline-offset:3px;border-radius:10px}
+svg{display:block}
+::selection{background:var(--lime);color:var(--ink)}
+html{scrollbar-width:thin;scrollbar-color:rgba(200,255,0,.45) transparent}
+
+.wrap{max-width:960px;margin:0 auto;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));padding-block:0 calc(var(--bar-h) + 48px);display:flex;flex-direction:column;gap:56px}
+
+/* Splash */
+.splash{min-height:min(88vh,760px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-block:56px 24px}
+.mark{font-family:var(--display);font-weight:400;font-size:clamp(120px,24vw,340px);line-height:.9;letter-spacing:-.01em;color:var(--lime);margin:0;animation:title-land 1.5s cubic-bezier(.16,1,.3,1) both}
+.names{font-family:var(--display);font-size:clamp(26px,3.2vw,46px);text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.6);margin:6px 0 0}
+.splash-line{font-family:var(--display);font-size:clamp(26px,2.8vw,42px);text-transform:uppercase;letter-spacing:.04em;color:var(--lime);min-height:1.25em;margin:22px 0 0;overflow:hidden}
+.splash-line span{display:inline-block}
+.splash-line span.in{animation:ticker-in .45s cubic-bezier(.16,1,.3,1) both}
+.fine{max-width:36rem;margin:30px auto 0;font-size:.875rem;color:var(--w30)}
+.fine a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.fine a:hover{color:var(--w65)}
+@keyframes title-land{0%{letter-spacing:.18em;opacity:.2}to{letter-spacing:-.01em;opacity:1}}
+@keyframes ticker-in{0%{opacity:0;transform:translateY(60%)}to{opacity:1;transform:none}}
+
+/* Headings */
+.h2{font-family:var(--display);font-weight:400;font-size:clamp(44px,5.5vw,84px);line-height:.9;text-transform:uppercase;margin:0}
+.lede{margin:14px 0 0;font-size:1.125rem;color:var(--w65);max-width:40rem}
+.sec{display:flex;flex-direction:column;gap:24px;scroll-margin-top:24px}
+
+/* On air deck */
+.decks{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}
+.deck{border:2px solid var(--w15);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px;min-width:0;position:relative;overflow:hidden;transition:opacity .3s,filter .3s,border-color .3s}
+.deck[data-slot=live].on{border-color:var(--lime);box-shadow:0 0 60px rgba(200,255,0,.08)}
+.deck[data-slot=live].paused{opacity:.55;filter:grayscale(1)}
+.slot{display:flex;align-items:center;gap:8px;font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w55)}
+.slot .dot{width:9px;height:9px;border-radius:50%;background:var(--w30)}
+.deck.on .slot{color:var(--lime)}
+.deck.on .dot{background:var(--lime);animation:pulse-glow 2s ease-in-out infinite}
+@keyframes pulse-glow{0%,to{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.25)}}
+.deck-title{font-family:var(--display);font-size:clamp(30px,3.6vw,48px);line-height:1;text-transform:uppercase;white-space:nowrap;overflow:hidden;min-width:0}
+.deck-title .run{display:inline-block;padding-right:1.2em}
+.deck-title.scroll .track-in{display:inline-flex;animation:ticker-scroll var(--dur,12s) linear 1.5s infinite}
+@keyframes ticker-scroll{to{transform:translateX(calc(-1 * var(--loop)))}}
+.deck-sub{color:var(--w55);font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock{font-family:var(--display);font-size:clamp(40px,5vw,64px);line-height:1;color:var(--white);font-variant-numeric:tabular-nums;margin-top:6px}
+.clock .colon.blink{animation:clock-blink 1.1s step-end infinite}
+@keyframes clock-blink{50%{opacity:.15}}
+.clock small{font-family:var(--sans);font-size:.75rem;font-weight:700;letter-spacing:.14em;color:var(--w30);margin-left:10px;vertical-align:middle}
+.stamp{position:absolute;right:18px;top:50%;font-family:var(--display);font-size:clamp(44px,6vw,72px);color:transparent;-webkit-text-stroke:3px var(--lime);text-shadow:0 0 60px rgba(200,255,0,.25);transform:translateY(-50%) rotate(-6deg);pointer-events:none}
+.stamp.show{animation:stamp-in .26s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes stamp-in{0%{opacity:0;transform:translateY(-50%) rotate(-6deg) scale(1.35)}to{opacity:1;transform:translateY(-50%) rotate(-6deg) scale(1)}}
+
+/* Running order */
+.list-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 24px;flex-wrap:wrap}
+.hint{font-size:.875rem;color:var(--w30)}
+ol.cues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.cue{border:2px solid var(--w15);border-radius:16px;background:var(--ink);position:relative;transition:border-color .2s}
+.cue:hover{border-color:rgba(200,255,0,.6)}
+.cue.shift{transition:transform .32s cubic-bezier(.2,.8,.2,1),border-color .2s}
+.cue.lift{z-index:4;border-color:var(--lime);box-shadow:0 24px 60px -20px rgba(0,0,0,.9),0 0 40px rgba(200,255,0,.1)}
+.cue.playing{border-color:var(--lime);box-shadow:0 0 60px rgba(200,255,0,.08)}
+.cue.up-next{border-style:dashed;border-color:rgba(200,255,0,.45)}
+.cue.drop{border-color:var(--lime);background:rgba(200,255,0,.06)}
+.row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 16px 16px 8px}
+.handle{width:30px;height:48px;border:0;background:transparent;color:var(--w30);display:grid;place-items:center;touch-action:none;cursor:grab;border-radius:8px}
+.handle:hover,.handle:active{color:var(--lime)}
+.handle:active{cursor:grabbing}
+.num{font-family:var(--display);font-size:44px;line-height:1;color:var(--w15);min-width:1.1em;text-align:center;font-variant-numeric:tabular-nums}
+.cue.loaded .num{color:var(--white)}
+.cue.playing .num{color:var(--lime)}
+.txt{min-width:0;display:flex;flex-direction:column;gap:2px}
+.moment{border:0;background:transparent;padding:0;width:100%;font-family:var(--display);font-size:clamp(22px,2.4vw,28px);line-height:1.1;text-transform:uppercase;letter-spacing:.01em;text-overflow:ellipsis}
+.song{border:0;background:transparent;padding:0;width:100%;font-size:1rem;color:var(--w65);text-overflow:ellipsis}
+.song::placeholder{color:var(--w30)}
+.moment:focus,.song:focus{outline:none;box-shadow:0 2px 0 var(--lime)}
+.meta{display:flex;gap:6px 14px;align-items:center;flex-wrap:wrap;font-size:.8125rem;color:var(--w30);margin-top:4px}
+.meta .file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:100%}
+.meta .dur{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tlink{border:0;background:transparent;padding:2px 0;color:var(--lime);font-weight:600;font-size:.8125rem;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(200,255,0,.4)}
+.tlink:hover{text-decoration-color:var(--lime)}
+.tlink.plain{color:var(--w55);text-decoration:none}
+.tlink.plain:hover{color:var(--white)}
+.play-cue{width:52px;height:52px;border-radius:50%;border:2px solid var(--w15);background:transparent;color:var(--white);display:grid;place-items:center;transition:transform .1s ease-out,border-color .2s,background .2s}
+.play-cue:hover{border-color:var(--lime);color:var(--lime)}
+.play-cue.on{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+.play-cue:disabled{opacity:.25;cursor:default}
+.play-cue:disabled:hover{border-color:var(--w15);color:var(--white)}
+
+.choices{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 16px 16px 82px}
+@media (max-width:520px){.choices{margin-left:16px;margin-right:16px}}
+.choice{flex:1 1 180px;min-width:0;text-align:left;border:2px solid var(--w15);background:transparent;border-radius:12px;padding:8px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:baseline;font-size:.875rem;color:var(--w65);transition:border-color .2s,background .2s,transform .1s ease-out}
+.choice b{font-size:.6875rem;letter-spacing:.12em;text-transform:uppercase;color:var(--w55)}
+.choice span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.choice .dur{font-family:var(--mono);font-size:.75rem;color:var(--w30)}
+.choice:hover{border-color:rgba(200,255,0,.6)}
+.choice.on{border-color:var(--lime);background:rgba(200,255,0,.08);color:var(--white)}
+.choice.on b{color:var(--lime)}
+.choice:active{transform:scale(.97)}
+.opts{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.2,.8,.2,1)}
+.opts.open{grid-template-rows:1fr}
+.opts>div{overflow:hidden;min-height:0}
+.opts-in{margin:0 16px 16px 52px;border-top:2px solid var(--w08);padding-top:16px;display:flex;flex-direction:column;gap:14px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:.6875rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--w55)}
+.field input[type=number],.field input[type=text]{border:2px solid var(--w15);background:transparent;border-radius:12px;padding:9px 12px;font-family:var(--mono);font-size:.9375rem;letter-spacing:0;color:var(--white);width:100%}
+.field input:focus{outline:none;border-color:var(--lime)}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:2px solid var(--w15);border-radius:12px;padding:6px 6px 6px 12px;font-size:.875rem;font-weight:500;letter-spacing:0;text-transform:none;color:var(--white)}
+.switch{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:999px;background:var(--w15);position:relative;cursor:pointer;margin:0;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--white);transition:transform .25s cubic-bezier(.2,.8,.2,1),background .2s}
+.switch:checked{background:var(--lime)}
+.switch:checked::after{transform:translateX(18px);background:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{border:2px solid var(--w15);background:transparent;border-radius:999px;padding:8px 16px;font-size:.875rem;font-weight:600;transition:transform .1s ease-out,border-color .2s,color .2s}
+.pill:hover{border-color:var(--lime);color:var(--lime)}
+.pill.danger{color:var(--danger)}
+.pill.danger:hover{border-color:var(--danger);color:var(--danger)}
+.pill.solid-danger{background:var(--danger);border-color:var(--danger);color:var(--ink)}
+.confirm{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.875rem;color:var(--w65)}
+
+.foot{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.notice{font-size:.875rem;color:var(--w30);max-width:44rem}
+
+/* Press feedback */
+.pill:active,.play-cue:active,.go:active,.ctl:active,.tlink:active{transform:scale(.95);transition:transform .08s ease-out}
+
+/* Control bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:8;background:rgba(7,7,7,.86);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:2px solid var(--w08);padding:14px max(24px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
+.bar-in{max-width:960px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 20px;align-items:center}
+.now{min-width:0;display:flex;flex-direction:column;gap:8px}
+.now-top{display:flex;align-items:baseline;gap:12px;min-width:0}
+.state{font-size:.6875rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w55);white-space:nowrap}
+.state.live{color:var(--lime)}
+.now-title{font-family:var(--display);font-size:22px;text-transform:uppercase;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.scrub{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-family:var(--mono);font-size:.75rem;color:var(--w55);font-variant-numeric:tabular-nums}
+.track{height:22px;display:flex;align-items:center;touch-action:none;cursor:pointer}
+.rail{width:100%;height:4px;border-radius:2px;background:var(--w15);position:relative;overflow:hidden;transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.track.active .rail{transform:scaleY(2)}
+.fill{position:absolute;inset:0;background:var(--lime);transform-origin:left;transform:scaleX(0)}
+.ctrls{display:flex;gap:8px;align-items:center}
+.ctl{width:48px;height:48px;border-radius:50%;border:2px solid var(--w15);background:transparent;color:var(--white);display:grid;place-items:center;transition:transform .1s ease-out,border-color .2s,color .2s}
+.ctl:hover:not(:disabled){border-color:var(--lime);color:var(--lime)}
+.ctl:disabled{opacity:.25;cursor:default}
+.vol{display:flex;align-items:center;gap:8px;color:var(--w55);width:120px}
+.vol input{width:100%;accent-color:var(--lime)}
+.go{border:0;border-radius:999px;background:var(--lime);color:var(--ink);font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.02em;line-height:1;padding:14px 28px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:200px;max-width:280px;transition:transform .1s ease-out,box-shadow .2s;box-shadow:0 0 40px rgba(200,255,0,.25)}
+.go small{font-family:var(--sans);font-size:.6875rem;font-weight:700;letter-spacing:.06em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.75}
+.go:hover:not(:disabled){box-shadow:0 0 60px rgba(200,255,0,.45)}
+.go:disabled{background:var(--w15);color:var(--w55);box-shadow:none;cursor:default}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--bar-h) + 14px);z-index:9;transform:translate(-50%,14px);opacity:0;pointer-events:none;background:var(--lime);color:var(--ink);padding:10px 18px;border-radius:999px;font-size:.9375rem;font-weight:700;max-width:calc(100% - 32px);transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:760px){
+  .decks{grid-template-columns:1fr}
+  .bar-in{grid-template-columns:1fr}
+  .ctrls{justify-content:space-between}
+  .vol{display:none}
+  .go{flex:1 1 auto;max-width:none;min-width:0}
+}
+@media (max-width:520px){
+  .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .row{gap:10px;padding-right:12px}
+  .num{font-size:34px}
+  .opts-in{margin-left:16px}
+  .splash{min-height:70vh}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+}
+@media (prefers-reduced-transparency:reduce){ .bar{background:var(--ink);-webkit-backdrop-filter:none;backdrop-filter:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="splash">
+    <h1 class="mark" aria-label="A and V">A&amp;V</h1>
+    <p class="names">Abhishek &amp; Valerie</p>
+    <p class="splash-line" aria-live="off"><span id="splashWord">Walk in.</span></p>
+    <p class="fine">The ceremony soundtrack. Add a song to each moment, then one button plays the next. Songs fade in and out on their own. <a href="#order">See the running order</a></p>
+  </header>
+
+  <section class="sec" aria-labelledby="airTitle">
+    <div>
+      <h2 class="h2" id="airTitle">On air</h2>
+      <p class="lede">What's playing now and what plays when you press Play next.</p>
+    </div>
+    <div class="decks">
+      <div class="deck" data-slot="live" id="liveDeck">
+        <div class="slot"><span class="dot"></span><span id="liveSlot">Live</span></div>
+        <div class="deck-title" id="liveTitle"><span class="track-in"><span class="run">No songs yet</span></span></div>
+        <div class="deck-sub" id="liveSub">Add a song to any moment to get started</div>
+        <div class="clock" id="clock" aria-label="Time left">0<span class="colon">:</span>00<small>LEFT</small></div>
+        <div class="stamp" id="stamp" hidden>PAUSED</div>
+      </div>
+      <div class="deck" data-slot="cue" id="nextDeck">
+        <div class="slot"><span class="dot"></span><span>Up next</span></div>
+        <div class="deck-title" id="nextTitle"><span class="track-in"><span class="run">—</span></span></div>
+        <div class="deck-sub" id="nextSub">Nothing queued</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="order" aria-labelledby="roTitle">
+    <div class="list-head">
+      <div>
+        <h2 class="h2" id="roTitle">The running order</h2>
+        <p class="lede" id="stats"></p>
+      </div>
+      <span class="hint">Drag the dots to reorder. Drop an audio file on any moment.</span>
+    </div>
+    <ol class="cues" id="cues"></ol>
+    <div class="foot">
+      <button class="pill" id="addCue">Add a moment</button>
+      <button class="pill" id="testBtn">Test speakers</button>
+      <span id="resetWrap"><button class="pill danger" id="resetBtn">Start over</button></span>
+    </div>
+    <p class="notice">Songs stay in this browser on this device and are never uploaded. Load them on the phone or laptop you'll use at the ceremony, keep it plugged in, and do a full run-through at the venue. Grey song names are suggestions. Keyboard: Space plays the next song, Esc fades out.</p>
+  </section>
+</div>
+
+<div class="bar" id="bar" role="region" aria-label="Music controls">
+  <div class="bar-in">
+    <div class="now">
+      <div class="now-top"><span class="state" id="state">Ready</span><span class="now-title" id="nowTitle">No songs yet</span></div>
+      <div class="scrub">
+        <span id="tNow">0:00</span>
+        <div class="track" id="track" role="slider" tabindex="0" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="rail"><div class="fill" id="fill"></div></div></div>
+        <span id="tLeft">-0:00</span>
+      </div>
+    </div>
+    <div class="ctrls">
+      <label class="vol" for="vol"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z"/></svg><input type="range" id="vol" min="0" max="100" value="90" aria-label="Volume"></label>
+      <button class="ctl" id="fadeBtn" disabled aria-label="Fade out" title="Fade out (Esc)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor" stroke="none"/><path d="M16 12h5"/></svg></button>
+      <button class="ctl" id="pauseBtn" disabled aria-label="Pause"><svg id="pauseIco" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+      <button class="go" id="goBtn">Play next<small id="goSub">Add a song first</small></button>
+    </div>
+  </div>
+</div>
+<input type="file" id="filePick" accept="audio/*" hidden>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+/* Songs that ship with the site, so they're ready on any device */
+const SONGS = {
+  "guests-arrive": {song:"So Come Holy Spirit – Instrumental", src:"songs/guests-arriving.mp3", fileName:"So Come Holy Spirit.mp3", duration:3454.1},
+  "abhishek-entrance": {song:"In Christ Alone – Instrumental Worship", src:"songs/abhishek-in-christ-alone.mp3", fileName:"In Christ Alone (Instrumental Worship).mp3", duration:202.7},
+  "abhishek-entrance-2": {song:"Sand Drawing – Judah Earl", src:"songs/abhishek-sand-drawing.mp3", fileName:"Sand Drawing – Judah Earl.mp3", duration:208.5},
+  "groomsmen-entrance": {song:"Gratitude – Instrumental Worship", src:"songs/groomsmen-gratitude.mp3", fileName:"Gratitude (Instrumental Worship).mp3", duration:291.5},
+  "valerie-entrance": {song:"Goodness of God – Instrumental Worship", src:"songs/valerie-goodness-of-god.mp3", fileName:"Goodness of God (Instrumental Worship).mp3", duration:240.8},
+  "bridesmaids-entrance": {song:"The Blessing – Instrumental Worship", src:"songs/bridesmaids-the-blessing.mp3", fileName:"The Blessing (Instrumental, Piano & Pads).mp3", duration:250.1},
+  "postlude": {song:"Haazir (Live) – Bridge Music", src:"songs/postlude-haazir.mp3", fileName:"Haazir (Live) – Bridge Music.mp3", duration:409.5},
+  "recessional": {song:"Gawahi (Live) – Bridge Music", src:"songs/recessional-gawahi.mp3", fileName:"Gawahi (Live) – Bridge Music.mp3", duration:285.5},
+  "postlude-2": {song:"Washed – Elevation Rhythm", src:"songs/postlude-washed.mp3", fileName:"Washed – Elevation Rhythm.mp3", duration:240.5},
+  "congratulations": {song:"Congratulations and Celebration", src:"songs/congratulations.mp3", fileName:"Congratulations and Celebration.mp3", duration:177.3},
+  "signing": {song:"Way Maker – Instrumental Worship", src:"songs/signing-way-maker.mp3", fileName:"Way Maker (Instrumental Worship).mp3", duration:234.2},
+};
+/* A moment can play several songs in a row ("tracks") */
+const SET = keys => { const t=keys.map(k=>({...SONGS[k]})); return {tracks:t, song:t.map(x=>x.song.split(" – ")[0]).join(" + "), src:t[0].src, fileName:`${t.length} songs, played in order`, duration:t.reduce((a,x)=>a+x.duration,0)}; };
+const DEFAULTS = [
+  {id:"guests-arrive", moment:"Guests arrive", suggest:"Soft instrumental playlist", fadeIn:3, fadeOut:6, loop:true, ...SONGS["guests-arrive"]},
+  {id:"groomsmen-entrance", moment:"Groomsmen walk in", suggest:"Song name", fadeIn:2, fadeOut:5, ...SONGS["groomsmen-entrance"]},
+  {id:"bridesmaids-entrance", moment:"Bridesmaids walk in", suggest:"Song name", fadeIn:2, fadeOut:5, ...SONGS["bridesmaids-entrance"]},
+  {id:"abhishek-entrance", moment:"Abhishek walks in", suggest:"Song name", fadeIn:2, fadeOut:6, ...SONGS["abhishek-entrance"], choices:[SONGS["abhishek-entrance"],SONGS["abhishek-entrance-2"]], pick:0},
+  {id:"valerie-entrance", moment:"Valerie walks in", suggest:"Song name", fadeIn:1, fadeOut:6, ...SONGS["valerie-entrance"]},
+  {id:"signing", moment:"Signing the register", suggest:"Song name", fadeIn:2, fadeOut:5, loop:true, ...SONGS["signing"]},
+  {id:"congratulations", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["congratulations"]},
+  {id:"recessional", moment:"Recessional · just married", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["recessional"]},
+  {id:"postlude", moment:"Guests head out", suggest:"Song name", fadeIn:3, fadeOut:8, loop:true, ...SET(["postlude-2","postlude"])},
+];
+const $ = s => document.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2,10);
+const freshCues = () => DEFAULTS.map(d => ({id:d.id||uid(), moment:d.moment, song:d.song||"", suggest:d.suggest, fadeIn:d.fadeIn, fadeOut:d.fadeOut, startAt:0, loop:!!d.loop, fileName:d.fileName||"", duration:d.duration||0, src:d.src||"", ...(d.choices?{choices:d.choices.map(o=>({...o})), pick:d.pick}:{}), ...(d.tracks?{tracks:d.tracks.map(o=>({...o}))}:{})}));
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+/* ---------- storage ---------- */
+let idb=null;
+function openDB(){ return new Promise(res=>{ try{ const r=indexedDB.open("av-ceremony-music",1); r.onupgradeneeded=()=>{ r.result.createObjectStore("kv"); r.result.createObjectStore("audio"); }; r.onsuccess=()=>res(r.result); r.onerror=()=>res(null);}catch(e){res(null);} }); }
+function tx(store,mode,fn){ return new Promise(res=>{ if(!idb) return res(undefined); try{ const t=idb.transaction(store,mode); const req=fn(t.objectStore(store)); t.oncomplete=()=>res(req&&req.result); t.onerror=()=>res(undefined);}catch(e){res(undefined);} }); }
+const kvGet=k=>tx("kv","readonly",s=>s.get(k)), kvSet=(k,v)=>tx("kv","readwrite",s=>s.put(v,k));
+const audioGet=id=>tx("audio","readonly",s=>s.get(id)), audioSet=(id,b)=>tx("audio","readwrite",s=>s.put(b,id)), audioDel=id=>tx("audio","readwrite",s=>s.delete(id));
+
+let cues=freshCues(), saveT;
+const openIds=new Set();
+function save(){ clearTimeout(saveT); saveT=setTimeout(()=>kvSet("cues",cues),250); }
+
+/* ---------- spring + rubber band ---------- */
+function spring({from,to,velocity=0,response=.35,damping=1,onUpdate,onDone}){
+  if(reduceMotion.matches){ onUpdate(to); onDone&&onDone(); return; }
+  let x=from,v=velocity,last=performance.now(); const w=2*Math.PI/response,k=w*w,c=2*damping*w;
+  (function step(now){ const dt=Math.min(.032,(now-last)/1000); last=now;
+    for(let i=0;i<4;i++){ const h=dt/4,a=-k*(x-to)-c*v; v+=a*h; x+=v*h; }
+    if(Math.abs(x-to)<.25&&Math.abs(v)<4){ onUpdate(to); onDone&&onDone(); } else { onUpdate(x); requestAnimationFrame(step); }
+  })(last);
+}
+const rubberband=(o,dim,c=.55)=>(o*dim*c)/(dim+c*Math.abs(o));
+
+/* ---------- audio ---------- */
+let ctx=null,master=null,deck=null,nextIdx=0;
+const volume=()=>Math.pow($("#vol").value/100,1.6);
+function ensureCtx(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; ctx=new AC(); master=ctx.createGain(); master.gain.value=volume(); master.connect(ctx.destination);} if(ctx.state==="suspended") ctx.resume(); return ctx; }
+
+async function playCue(i,track=0){
+  const cue=cues[i]; if(!cue) return;
+  if(!cue.fileName){ toast(`Add a song to “${cue.moment}” first`); return; }
+  const tracks=cue.tracks&&cue.tracks.length?cue.tracks:null;
+  if(tracks) track=Math.min(Math.max(0,track),tracks.length-1);
+  let url;
+  if(tracks) url=tracks[track].src;
+  else if(cue.src) url=cue.src;
+  else{
+    const blob=await audioGet(cue.id);
+    if(!blob){ toast(`Can't find the song for “${cue.moment}”. Add it again from Options.`); return; }
+    url=URL.createObjectURL(blob);
+  }
+  ensureCtx();
+  if(deck) fadeOutDeck(deck,Math.min(deck.cue.fadeOut||2,4));
+  const el=new Audio();
+  el.src=url; el.loop=tracks?false:!!cue.loop; el.preload="auto";
+  const gain=ctx.createGain(); ctx.createMediaElementSource(el).connect(gain); gain.connect(master);
+  const d={cue,el,gain,url,fading:false,autoFade:false,track:tracks?track:0};
+  const fi=Math.max(0,+cue.fadeIn||0);
+  gain.gain.setValueAtTime(fi>0?.0001:1,ctx.currentTime);
+  el.addEventListener("loadedmetadata",()=>{ if(track===0&&cue.startAt>0&&cue.startAt<el.duration) el.currentTime=cue.startAt; },{once:true});
+  el.addEventListener("ended",()=>{
+    if(deck!==d) return;
+    if(tracks){ const nx=d.track+1; if(nx<tracks.length) return switchTrack(d,nx); if(cue.loop) return switchTrack(d,0); }
+    stopDeck(d);
+  });
+  el.addEventListener("play",updateDeck); el.addEventListener("pause",updateDeck);
+  try{ await el.play(); }catch(e){ URL.revokeObjectURL(url); toast("Your browser paused the music. Tap Play next to start it."); return; }
+  if(fi>0) gain.gain.exponentialRampToValueAtTime(1,ctx.currentTime+fi);
+  deck=d; nextIdx=i+1; requestWake(); render();
+}
+function switchTrack(d,k){
+  const t=d.cue.tracks&&d.cue.tracks[k]; if(!t||d.fading) return;
+  d.track=k; d.autoFade=false; d.el.src=t.src;
+  d.gain.gain.cancelScheduledValues(ctx.currentTime); d.gain.gain.setValueAtTime(1,ctx.currentTime);
+  d.el.play().catch(()=>{}); render();
+}
+const nowLabel=d=>d.cue.tracks&&d.cue.tracks[d.track]?d.cue.tracks[d.track].song:label(d.cue);
+function fadeOutDeck(d,secs){
+  if(d.fading) return; d.fading=true;
+  const t=ctx.currentTime,s=Math.max(.3,secs);
+  d.gain.gain.cancelScheduledValues(t); d.gain.gain.setValueAtTime(Math.max(d.gain.gain.value,.0001),t); d.gain.gain.exponentialRampToValueAtTime(.0001,t+s);
+  setTimeout(()=>stopDeck(d),s*1000+80);
+  if(deck===d) render();
+}
+function stopDeck(d){ d.el.pause(); URL.revokeObjectURL(d.url); try{d.gain.disconnect();}catch(e){} if(deck===d){ deck=null; render(); if(nextLoaded()<0 && cues.some(c=>c.fileName)) toast("That's the last song. Congratulations, you two!"); } }
+const live=()=>deck&&!deck.fading;
+function nextLoaded(){ for(let i=nextIdx;i<cues.length;i++) if(cues[i].fileName) return i; return -1; }
+function go(){
+  const i=nextLoaded();
+  if(i<0){ toast(cues.some(c=>c.fileName)?"That's the last song. Congratulations, you two!":"Add a song to any moment to get started"); return; }
+  try{ navigator.vibrate&&navigator.vibrate(8); }catch(e){}
+  playCue(i);
+}
+function fadeNow(){ if(live()) fadeOutDeck(deck,deck.cue.fadeOut||4); }
+
+let wake=null;
+async function requestWake(){ try{ if(!wake&&navigator.wakeLock){ wake=await navigator.wakeLock.request("screen"); wake.addEventListener("release",()=>wake=null);} }catch(e){} }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&deck) requestWake(); });
+
+/* ---------- render ---------- */
+const fmt=s=>{ if(!isFinite(s)||s<0) s=0; return Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0"); };
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const label=c=>c.song||(c.fileName||"").replace(/\.[^.]+$/,"")||c.suggest;
+const PLAY=`<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.87l12-7.5a1 1 0 0 0 0-1.74l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>`;
+const STOP=`<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>`;
+const GRIP=`<svg width="12" height="18" viewBox="0 0 12 18" fill="currentColor"><circle cx="3" cy="3" r="1.7"/><circle cx="9" cy="3" r="1.7"/><circle cx="3" cy="9" r="1.7"/><circle cx="9" cy="9" r="1.7"/><circle cx="3" cy="15" r="1.7"/><circle cx="9" cy="15" r="1.7"/></svg>`;
+const ti=open=>open?"":'tabindex="-1"';
+
+function render(){
+  const a=document.activeElement,fid=a&&a.id,sel=[a&&a.selectionStart,a&&a.selectionEnd];
+  const n=nextLoaded();
+  $("#cues").innerHTML=cues.map((c,i)=>{
+    const playing=live()&&deck.cue.id===c.id, open=openIds.has(c.id);
+    return `<li class="cue ${c.fileName?"loaded":""} ${playing?"playing":""} ${!playing&&i===n?"up-next":""}" data-id="${c.id}">
+      <div class="row">
+        <button class="handle" id="h-${c.id}" aria-label="Move ${esc(c.moment)}. Hold Alt and press the arrow keys.">${GRIP}</button>
+        <div class="num">${i+1}</div>
+        <div class="txt">
+          <input class="moment" id="m-${c.id}" value="${esc(c.moment)}" aria-label="Moment name">
+          <input class="song" id="s-${c.id}" value="${esc(c.song)}" placeholder="${esc(c.suggest||"Song name")}" aria-label="Song name">
+          <div class="meta">
+            ${c.fileName?`<span class="file" title="${esc(c.fileName)}">${esc(c.fileName)}</span>${c.duration?`<span class="dur">${fmt(c.duration)}</span>`:""}`:`<button class="tlink" data-act="file">Add a song</button>`}
+            <button class="tlink plain" data-act="opts" aria-expanded="${open}" aria-controls="o-${c.id}">${open?"Hide options":"Options"}</button>
+          </div>
+        </div>
+        <button class="play-cue ${playing?"on":""}" data-act="play" ${c.fileName?"":"disabled"} aria-label="${playing?"Fade out":"Play"} ${esc(c.moment)}">${playing?STOP:PLAY}</button>
+      </div>
+      ${c.tracks&&c.tracks.length>1?`<div class="choices tracks" aria-label="Songs in ${esc(c.moment)}">${c.tracks.map((o,k)=>`<button class="choice ${playing&&deck.track===k?"on":""}" data-act="track" data-k="${k}" aria-label="Play ${esc(o.song)}"><b>${playing&&deck.track===k?"Now":k+1}</b><span>${esc(o.song)}</span><span class="dur">${fmt(o.duration)}</span></button>`).join("")}</div>`:""}
+      ${c.choices&&c.choices.length>1?`<div class="choices" role="radiogroup" aria-label="Song choice for ${esc(c.moment)}">${c.choices.map((o,k)=>`<button class="choice ${c.pick===k?"on":""}" role="radio" aria-checked="${c.pick===k}" data-act="pick" data-k="${k}"><b>Song ${k+1}</b><span>${esc(o.song)}</span><span class="dur">${fmt(o.duration)}</span></button>`).join("")}</div>`:""}
+      <div class="opts ${open?"open":""}" id="o-${c.id}"><div><div class="opts-in">
+        <div class="fields">
+          <label class="field">Fade in (seconds)<input type="number" id="fi-${c.id}" data-k="fadeIn" min="0" max="30" step="0.5" value="${c.fadeIn}" ${ti(open)}></label>
+          <label class="field">Fade out (seconds)<input type="number" id="fo-${c.id}" data-k="fadeOut" min="0" max="30" step="0.5" value="${c.fadeOut}" ${ti(open)}></label>
+          <label class="field">Start from (m:ss)<input type="text" id="st-${c.id}" data-k="startAt" value="${fmt(c.startAt)}" inputmode="numeric" ${ti(open)}></label>
+          <label class="field">Repeat<span class="switch-row">Loop this song<input type="checkbox" class="switch" id="lp-${c.id}" data-k="loop" ${c.loop?"checked":""} ${ti(open)}></span></label>
+        </div>
+        <div class="actions" data-actions>
+          <button class="pill" data-act="file" ${ti(open)}>${c.fileName?"Replace song":"Add a song"}</button>
+          ${c.fileName?`<button class="pill" data-act="unfile" ${ti(open)}>Remove song</button>`:""}
+          <button class="pill danger" data-act="del" ${ti(open)}>Delete moment</button>
+        </div>
+      </div></div></div>
+    </li>`;
+  }).join("");
+  if(fid){ const el=document.getElementById(fid); if(el){ el.focus({preventScroll:true}); try{ if(sel[0]!=null) el.setSelectionRange(sel[0],sel[1]); }catch(e){} } }
+  const loaded=cues.filter(c=>c.fileName),total=loaded.reduce((s,c)=>s+(c.duration||0),0);
+  $("#stats").textContent=`${cues.length} moments · ${loaded.length} with songs${total?` · ${fmt(total)} of music`:""}`;
+  updateDeck();
+}
+
+function setTitle(el,text){
+  const run=el.querySelector(".run"); if(run.textContent===text && el.dataset.t===text) return;
+  el.dataset.t=text; el.classList.remove("scroll");
+  el.innerHTML=`<span class="track-in"><span class="run">${esc(text)}</span></span>`;
+  requestAnimationFrame(()=>{ const r=el.querySelector(".run"); if(r && r.offsetWidth>el.clientWidth+4 && !reduceMotion.matches){ const ti=el.querySelector(".track-in"); ti.innerHTML+=`<span class="run" aria-hidden="true">${esc(text)}</span>`; el.style.setProperty("--loop",r.offsetWidth+"px"); el.style.setProperty("--dur",(r.offsetWidth/60)+"s"); el.classList.add("scroll"); } });
+}
+
+function updateDeck(){
+  const on=live(),n=nextLoaded(),paused=on&&deck.el.paused,any=cues.some(c=>c.fileName);
+  $("#fadeBtn").disabled=!on; $("#pauseBtn").disabled=!on;
+  const L=$("#liveDeck"); L.classList.toggle("on",!!deck); L.classList.toggle("paused",!!paused);
+  const st=$("#stamp"); if(paused&&st.hidden){ st.hidden=false; st.classList.remove("show"); void st.offsetWidth; st.classList.add("show"); } else if(!paused) st.hidden=true;
+  if(deck){
+    const s=deck.fading?"Fading out":paused?"Paused":"Live";
+    $("#liveSlot").textContent=s; $("#state").textContent=s; $("#state").classList.toggle("live",!paused&&!deck.fading);
+    setTitle($("#liveTitle"),nowLabel(deck)); $("#liveSub").textContent=deck.cue.moment;
+    $("#nowTitle").textContent=nowLabel(deck);
+    $("#pauseIco").innerHTML=paused?`<path d="M7 4.5v15a1 1 0 0 0 1.5.87l12-7.5a1 1 0 0 0 0-1.74l-12-7.5A1 1 0 0 0 7 4.5z"/>`:`<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>`;
+    $("#pauseBtn").setAttribute("aria-label",paused?"Resume":"Pause");
+  }else{
+    $("#liveSlot").textContent="Live"; $("#state").textContent=any?(n>=0?"Ready":"Done"):"Ready"; $("#state").classList.remove("live");
+    setTitle($("#liveTitle"),any?(n>=0?"Silence":"That's a wrap"):"No songs yet");
+    $("#liveSub").textContent=any?(n>=0?"Press Play next when you're ready":"Every song has played. Tap play on any moment to hear it again."):"Add a song to any moment to get started";
+    $("#nowTitle").textContent=n>=0?`Ready: ${cues[n].moment}`:any?"Every song has played":"No songs yet";
+    $("#tNow").textContent="0:00"; $("#tLeft").textContent="-0:00"; $("#fill").style.transform="scaleX(0)"; setClock(0,false);
+  }
+  setTitle($("#nextTitle"),n>=0?label(cues[n]):"—");
+  $("#nextSub").textContent=n>=0?`${n+1} · ${cues[n].moment}`:(any?"End of the running order":"Nothing queued");
+  $("#nextDeck").classList.toggle("on",n>=0&&!deck);
+  $("#goBtn").disabled=n<0;
+  $("#goSub").textContent=n>=0?cues[n].moment:(any?"End of the running order":"Add a song first");
+}
+function setClock(sec,blink){ const m=Math.floor(Math.max(0,sec)/60),s=String(Math.floor(Math.max(0,sec)%60)).padStart(2,"0"); $("#clock").innerHTML=`${m}<span class="colon ${blink?"blink":""}">:</span>${s}<small>LEFT</small>`; }
+
+/* ---------- scrubber ---------- */
+let scrub=null; const track=$("#track");
+const scrubFrac=e=>{ const r=track.getBoundingClientRect(); return Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)); };
+function showFrac(f,d){ $("#fill").style.transform=`scaleX(${f})`; $("#tNow").textContent=fmt(f*d); $("#tLeft").textContent="-"+fmt(d-f*d); }
+track.addEventListener("pointerdown",e=>{ if(!live()||!deck.el.duration) return; track.setPointerCapture(e.pointerId); track.classList.add("active"); scrub={f:scrubFrac(e)}; showFrac(scrub.f,deck.el.duration); });
+track.addEventListener("pointermove",e=>{ if(!scrub||!deck) return; scrub.f=scrubFrac(e); showFrac(scrub.f,deck.el.duration); });
+const endScrub=()=>{ if(!scrub) return; if(deck&&deck.el.duration) deck.el.currentTime=scrub.f*deck.el.duration; scrub=null; track.classList.remove("active"); };
+track.addEventListener("pointerup",endScrub); track.addEventListener("pointercancel",endScrub);
+track.addEventListener("keydown",e=>{ if(!live()) return; if(e.key==="ArrowRight"){deck.el.currentTime+=5;e.preventDefault();} if(e.key==="ArrowLeft"){deck.el.currentTime-=5;e.preventDefault();} });
+
+let lastSec=-1, lastBlink=null;
+function tick(){
+  if(live()&&!scrub){
+    const el=deck.el,d=el.duration||0,t=el.currentTime;
+    if(d) showFrac(t/d,d);
+    track.setAttribute("aria-valuenow",d?Math.round(t/d*100):0);
+    const left=el.loop?t:d-t, sec=Math.floor(left), blink=!el.paused;
+    if(sec!==lastSec||blink!==lastBlink){ setClock(left,blink); lastSec=sec; lastBlink=blink; }
+    const fo=+deck.cue.fadeOut||0;
+    const endsHere=deck.cue.tracks?(deck.track===deck.cue.tracks.length-1&&!deck.cue.loop):!el.loop;
+    if(endsHere&&d&&fo>0&&d-t<=fo&&!deck.autoFade){ deck.autoFade=true; fadeOutDeck(deck,d-t); }
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ---------- drag to reorder ---------- */
+let drag=null;
+$("#cues").addEventListener("pointerdown",e=>{
+  const h=e.target.closest(".handle"); if(!h||e.button>0) return; e.preventDefault();
+  const li=h.closest(".cue"),items=[...$("#cues").children],idx=items.indexOf(li),rects=items.map(x=>x.getBoundingClientRect());
+  const gap=rects.length>1?rects[1].top-rects[0].bottom:12;
+  h.setPointerCapture(e.pointerId); li.classList.add("lift"); items.forEach(x=>x!==li&&x.classList.add("shift"));
+  drag={h,li,items,rects,gap,idx,target:idx,y0:e.clientY,dy:0,hist:[{y:e.clientY,t:performance.now()}]};
+});
+$("#cues").addEventListener("pointermove",e=>{
+  if(!drag||e.target!==drag.h) return;
+  const {rects,idx,li,items,gap}=drag,n=rects.length,H=rects[idx].height;
+  let dy=e.clientY-drag.y0; const min=rects[0].top-rects[idx].top,max=rects[n-1].bottom-rects[idx].bottom;
+  if(dy<min) dy=min-rubberband(min-dy,H); else if(dy>max) dy=max+rubberband(dy-max,H);
+  drag.dy=dy; li.style.transform=`translateY(${dy}px) scale(1.015)`;
+  drag.hist.push({y:e.clientY,t:performance.now()}); if(drag.hist.length>6) drag.hist.shift();
+  const center=rects[idx].top+H/2+dy; let target=idx;
+  rects.forEach((r,j)=>{ if(j<idx&&center<r.top+r.height/2&&j<target) target=j; if(j>idx&&center>r.top+r.height/2&&j>target) target=j; });
+  drag.target=target;
+  items.forEach((x,j)=>{ if(j===idx) return; let s=0; if(j>idx&&j<=target) s=-(H+gap); if(j<idx&&j>=target) s=H+gap; x.style.transform=s?`translateY(${s}px)`:""; });
+});
+function endDrag(){
+  if(!drag) return; const d=drag; drag=null; const {rects,idx,target,li,items}=d;
+  const a=d.hist[0],b=d.hist[d.hist.length-1],v=b.t>a.t?(b.y-a.y)/((b.t-a.t)/1000):0;
+  const to=target>idx?rects[target].bottom-rects[idx].bottom:target<idx?rects[target].top-rects[idx].top:0;
+  spring({from:d.dy,to,velocity:v,response:.32,onUpdate:y=>li.style.transform=`translateY(${y}px) scale(${1+.015*Math.min(1,Math.abs(y-to)/40)})`,
+    onDone:()=>{ items.forEach(x=>{x.classList.remove("shift","lift");x.style.transform="";}); if(target!==idx) moveCue(idx,target); }});
+}
+$("#cues").addEventListener("pointerup",e=>{ if(drag&&e.target===drag.h) endDrag(); });
+$("#cues").addEventListener("pointercancel",()=>endDrag());
+function moveCue(from,to){
+  const [c]=cues.splice(from,1); cues.splice(to,0,c);
+  if(deck) nextIdx=cues.indexOf(deck.cue)+1;
+  save(); render();
+  if(document.activeElement&&document.activeElement.classList.contains("handle")){ const h=document.getElementById("h-"+c.id); h&&h.focus(); }
+}
+
+/* ---------- list events ---------- */
+const cueOf=el=>{ const li=el.closest(".cue"); return li&&cues.find(c=>c.id===li.dataset.id); };
+let pickFor=null;
+$("#cues").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const c=cueOf(b),i=cues.indexOf(c),act=b.dataset.act;
+  if(act==="play"){ ensureCtx(); if(live()&&deck.cue.id===c.id) fadeNow(); else playCue(i); }
+  if(act==="file"){ pickFor=c.id; $("#filePick").value=""; $("#filePick").click(); }
+  if(act==="unfile"){ if(deck&&deck.cue.id===c.id) stopDeck(deck); audioDel(c.id); c.fileName=""; c.duration=0; c.src=""; delete c.tracks; if(c.choices) c.pick=-1; save(); render(); toast("Song removed"); }
+  if(act==="track"){
+    const k=+b.dataset.k; ensureCtx();
+    if(live()&&deck.cue.id===c.id) switchTrack(deck,k); else playCue(i,k);
+  }
+  if(act==="pick"){
+    const k=+b.dataset.k, o=c.choices[k]; if(!o||c.pick===k) return;
+    if(deck&&deck.cue.id===c.id) fadeOutDeck(deck,1.5);
+    c.pick=k; Object.assign(c,{song:o.song,src:o.src,fileName:o.fileName,duration:o.duration});
+    save(); render(); toast(`${c.moment}: Song ${k+1} selected`);
+  }
+  if(act==="opts"){
+    const open=!openIds.has(c.id); open?openIds.add(c.id):openIds.delete(c.id);
+    const o=document.getElementById("o-"+c.id); o.classList.toggle("open",open); b.setAttribute("aria-expanded",open); b.textContent=open?"Hide options":"Options";
+    o.querySelectorAll("input,button").forEach(x=>open?x.removeAttribute("tabindex"):x.setAttribute("tabindex","-1"));
+  }
+  if(act==="del"){
+    const box=b.closest("[data-actions]");
+    box.innerHTML=`<span class="confirm">Delete “${esc(c.moment)}”? Its song goes too. <button class="pill solid-danger" data-act="delYes">Delete</button><button class="pill" data-act="delNo">Keep</button></span>`;
+    box.querySelector("[data-act=delNo]").focus();
+  }
+  if(act==="delYes"){ if(deck&&deck.cue.id===c.id) stopDeck(deck); audioDel(c.id); cues.splice(i,1); openIds.delete(c.id); if(nextIdx>i) nextIdx--; save(); render(); toast("Moment deleted"); }
+  if(act==="delNo") render();
+});
+$("#cues").addEventListener("keydown",e=>{
+  const h=e.target.closest(".handle"); if(!h||!e.altKey) return;
+  const i=cues.indexOf(cueOf(h));
+  if(e.key==="ArrowUp"&&i>0){ e.preventDefault(); moveCue(i,i-1); }
+  if(e.key==="ArrowDown"&&i<cues.length-1){ e.preventDefault(); moveCue(i,i+1); }
+});
+const parseTime=v=>{ v=String(v).trim(); if(v.includes(":")){ const [m,s]=v.split(":"); return (+m||0)*60+(+s||0);} return +v||0; };
+$("#cues").addEventListener("input",e=>{
+  const t=e.target,c=cueOf(t); if(!c) return;
+  if(t.classList.contains("moment")) c.moment=t.value;
+  else if(t.classList.contains("song")) c.song=t.value;
+  else if(t.dataset.k==="loop") c.loop=t.checked;
+  else if(t.dataset.k==="fadeIn"||t.dataset.k==="fadeOut") c[t.dataset.k]=Math.max(0,+t.value||0);
+  else return;
+  save(); if(deck&&deck.cue===c) deck.el.loop=!!c.loop; updateDeck();
+});
+$("#cues").addEventListener("change",e=>{ const c=cueOf(e.target); if(c&&e.target.dataset.k==="startAt"){ c.startAt=Math.max(0,parseTime(e.target.value)); e.target.value=fmt(c.startAt); save(); } });
+
+async function attach(id,file){
+  if(!file||!(file.type.startsWith("audio/")||/\.(mp3|m4a|aac|wav|ogg|flac|opus|webm)$/i.test(file.name))){ toast("That file isn't audio. Try an MP3, M4A or WAV."); return; }
+  const c=cues.find(x=>x.id===id); if(!c) return;
+  await audioSet(c.id,file);
+  c.fileName=file.name; c.src=""; delete c.tracks; if(c.choices){ c.pick=-1; c.song=""; } if(!c.song) c.song=file.name.replace(/\.[^.]+$/,"").replace(/_+/g," ");
+  try{ const u=URL.createObjectURL(file),a=new Audio(); a.preload="metadata"; a.src=u; a.onloadedmetadata=()=>{ c.duration=a.duration; URL.revokeObjectURL(u); save(); render(); }; }catch(e){}
+  save(); render(); toast(`Song added to “${c.moment}”`);
+}
+$("#filePick").addEventListener("change",e=>{ if(pickFor) attach(pickFor,e.target.files[0]); });
+$("#cues").addEventListener("dragover",e=>{ const li=e.target.closest(".cue"); if(!li) return; e.preventDefault(); document.querySelectorAll(".cue.drop").forEach(x=>x!==li&&x.classList.remove("drop")); li.classList.add("drop"); });
+$("#cues").addEventListener("dragleave",e=>{ const li=e.target.closest(".cue"); if(li&&!li.contains(e.relatedTarget)) li.classList.remove("drop"); });
+$("#cues").addEventListener("drop",e=>{ const li=e.target.closest(".cue"); if(!li) return; e.preventDefault(); li.classList.remove("drop"); attach(li.dataset.id,e.dataTransfer.files[0]); });
+addEventListener("dragover",e=>e.preventDefault()); addEventListener("drop",e=>e.preventDefault());
+
+/* ---------- controls ---------- */
+$("#goBtn").addEventListener("click",()=>{ ensureCtx(); go(); });
+$("#fadeBtn").addEventListener("click",fadeNow);
+$("#pauseBtn").addEventListener("click",()=>{ if(!live()) return; deck.el.paused?deck.el.play():deck.el.pause(); render(); });
+$("#vol").addEventListener("input",()=>{ if(master) master.gain.setTargetAtTime(volume(),ctx.currentTime,.05); try{localStorage.setItem("av-vol",$("#vol").value);}catch(e){} });
+$("#addCue").addEventListener("click",()=>{
+  const c={id:uid(),moment:"New moment",song:"",suggest:"Song name",fadeIn:2,fadeOut:5,startAt:0,loop:false,fileName:"",duration:0};
+  cues.push(c); save(); render();
+  const li=document.querySelector(`[data-id="${c.id}"]`);
+  if(li&&!reduceMotion.matches){ li.style.opacity="0"; spring({from:16,to:0,response:.4,onUpdate:y=>{li.style.transform=`translateY(${y}px)`;li.style.opacity=String(1-y/16);},onDone:()=>{li.style.transform="";li.style.opacity="";}}); }
+  const m=document.getElementById("m-"+c.id); m.focus(); m.select();
+});
+const resetBtn=`<button class="pill danger" id="resetBtn">Start over</button>`;
+$("#resetWrap").addEventListener("click",e=>{
+  const w=$("#resetWrap");
+  if(e.target.id==="resetBtn"){ w.innerHTML=`<span class="confirm">Start over? This removes every moment and song on this device. <button class="pill solid-danger" id="resetYes">Start over</button><button class="pill" id="resetNo">Keep my list</button></span>`; $("#resetNo").focus(); }
+  else if(e.target.id==="resetYes"){ if(deck) stopDeck(deck); cues.forEach(c=>audioDel(c.id)); cues=freshCues(); openIds.clear(); nextIdx=0; save(); render(); w.innerHTML=resetBtn; toast("Fresh start. The running order is back to the default."); }
+  else if(e.target.id==="resetNo") w.innerHTML=resetBtn;
+});
+$("#testBtn").addEventListener("click",()=>{
+  const c=ensureCtx(),t=c.currentTime;
+  [523.25,659.25,783.99].forEach((f,k)=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; g.gain.setValueAtTime(.0001,t+k*.18); g.gain.exponentialRampToValueAtTime(.25,t+k*.18+.03); g.gain.exponentialRampToValueAtTime(.0001,t+k*.18+1.2); o.connect(g); g.connect(master); o.start(t+k*.18); o.stop(t+k*.18+1.3); });
+  toast("Playing a test chime. Adjust the volume until it sounds right.");
+});
+document.addEventListener("keydown",e=>{
+  const tag=e.target.tagName;
+  if(tag==="INPUT"){ if(e.key==="Escape"||(e.key==="Enter"&&e.target.type!=="checkbox")) e.target.blur(); return; }
+  if(e.code==="Space"&&!(tag==="BUTTON"&&e.target.id!=="goBtn")&&e.target.id!=="track"){ e.preventDefault(); ensureCtx(); go(); }
+  if(e.key==="Escape") fadeNow();
+});
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+
+/* splash line cycles through the day */
+const WORDS=["Walk in.","Say I do.","Sign it.","Dance out."]; let wi=0;
+if(!reduceMotion.matches) setInterval(()=>{ wi=(wi+1)%WORDS.length; const s=$("#splashWord"); s.classList.remove("in"); void s.offsetWidth; s.textContent=WORDS[wi]; s.classList.add("in"); },2200);
+
+const setBH=()=>document.documentElement.style.setProperty("--bar-h",$("#bar").offsetHeight+"px");
+try{ new ResizeObserver(setBH).observe($("#bar")); }catch(e){} setBH();
+
+/* ---------- boot ---------- */
+try{ const v=localStorage.getItem("av-vol"); if(v!=null) $("#vol").value=v; }catch(e){}
+render(); requestAnimationFrame(tick);
+openDB().then(async db=>{
+  idb=db;
+  if(!db){ toast("This browser can't save songs, so they'll be lost if you reload."); return; }
+  const saved=await kvGet("cues");
+  if(Array.isArray(saved)&&saved.length){
+    cues=saved;
+    /* Swap any built-in song that has since been replaced (only if the moment still uses the old built-in file) */
+    cues.forEach(c=>{ if(c.src==="songs/abhishek-entrance.mp3") Object.assign(c,SONGS["abhishek-entrance"]); });
+    /* Bring built-in songs into lists saved before they existed (once each) */
+    const fresh=id=>freshCues().find(c=>c.id===id);
+    if(!cues.some(c=>c.id==="guests-arrive") && !(await kvGet("seeded-guests-arrive"))){
+      const g=cues.find(c=>/guest/i.test(c.moment)&&/arriv/i.test(c.moment));
+      if(g){ if(!g.fileName) Object.assign(g,SONGS["guests-arrive"]); }
+      else cues.unshift(fresh("guests-arrive"));
+    }
+    if(!cues.some(c=>c.id==="abhishek-entrance") && !(await kvGet("seeded-abhishek"))){
+      const gi=cues.findIndex(c=>c.id==="guests-arrive"||(/guest/i.test(c.moment)&&/arriv/i.test(c.moment)));
+      cues.splice(gi>=0?gi+1:Math.min(1,cues.length),0,fresh("abhishek-entrance"));
+    }
+    if(!cues.some(c=>c.id==="groomsmen-entrance") && !(await kvGet("seeded-groomsmen"))){
+      const w=cues.find(c=>/wedding party|groomsm/i.test(c.moment));
+      if(w){ if(!w.fileName){ Object.assign(w,SONGS["groomsmen-entrance"]); if(/^wedding party walks in$/i.test(w.moment.trim())) w.moment="Groomsmen walk in"; } }
+      else{ const ai=cues.findIndex(c=>c.id==="abhishek-entrance"); cues.splice(ai>=0?ai+1:Math.min(2,cues.length),0,fresh("groomsmen-entrance")); }
+    }
+    if(!cues.some(c=>c.id==="valerie-entrance") && !(await kvGet("seeded-valerie"))){
+      const v=cues.find(c=>/valerie/i.test(c.moment));
+      if(v){ if(!v.fileName) Object.assign(v,SONGS["valerie-entrance"]); }
+      else{ const gi=cues.findIndex(c=>c.id==="groomsmen-entrance"); cues.splice(gi>=0?gi+1:Math.min(3,cues.length),0,fresh("valerie-entrance")); }
+    }
+    if(!cues.some(c=>c.id==="signing") && !(await kvGet("seeded-signing"))){
+      const s=cues.find(c=>/sign/i.test(c.moment));
+      if(s){ if(!s.fileName){ Object.assign(s,SONGS["signing"]); s.loop=true; } }
+      else{ const vi=cues.findIndex(c=>c.id==="valerie-entrance"); cues.splice(vi>=0?vi+2:Math.min(5,cues.length),0,fresh("signing")); }
+    }
+    /* One-time: add Bridesmaids and set the processional order */
+    if(!(await kvGet("order-v2"))){
+      if(!cues.some(c=>c.id==="bridesmaids-entrance"||/bridesmaid/i.test(c.moment))) cues.push(fresh("bridesmaids-entrance"));
+      const finders=[
+        c=>c.id==="guests-arrive"||(/guest/i.test(c.moment)&&/arriv/i.test(c.moment)),
+        c=>c.id==="groomsmen-entrance"||/groomsm/i.test(c.moment),
+        c=>c.id==="bridesmaids-entrance"||/bridesmaid/i.test(c.moment),
+        c=>c.id==="abhishek-entrance"||/abhishek/i.test(c.moment),
+        c=>c.id==="valerie-entrance"||/valerie/i.test(c.moment),
+      ];
+      const picked=[]; finders.forEach(f=>{ const c=cues.find(x=>f(x)&&!picked.includes(x)); if(c) picked.push(c); });
+      const at=Math.min(...picked.map(c=>cues.indexOf(c)));
+      cues=cues.filter(c=>!picked.includes(c)); cues.splice(at,0,...picked);
+    }
+    if(!cues.some(c=>c.id==="postlude") && !(await kvGet("seeded-postlude"))){
+      const pl=cues.find(c=>/head out|postlude|leave/i.test(c.moment));
+      if(pl){ if(!pl.fileName){ Object.assign(pl,SONGS["postlude"]); pl.loop=true; } }
+      else cues.push(fresh("postlude"));
+    }
+    if(!cues.some(c=>c.id==="recessional") && !(await kvGet("seeded-recessional"))){
+      const rc=cues.find(c=>/just married|recessional/i.test(c.moment));
+      if(rc){ if(!rc.fileName){ Object.assign(rc,SONGS["recessional"]); if(/^just married$/i.test(rc.moment.trim())) rc.moment="Recessional · just married"; } }
+      else{ const pi=cues.findIndex(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment)); cues.splice(pi>=0?pi:cues.length,0,fresh("recessional")); }
+    }
+    if(!(await kvGet("postlude-order-v2"))){
+      const pl=cues.find(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment));
+      if(pl && pl.tracks && pl.tracks.length===2 && pl.tracks[0].src===SONGS["postlude"].src && pl.tracks[1].src===SONGS["postlude-2"].src){
+        const keep={loop:pl.loop}; Object.assign(pl,SET(["postlude-2","postlude"]),keep);
+      }
+    }
+    if(!(await kvGet("order-v3"))){
+      const un=cues.find(c=>/unity/i.test(c.moment));
+      if(un){ audioDel(un.id); cues=cues.filter(c=>c!==un); }
+      if(!cues.some(c=>c.id==="congratulations"||/congratulat/i.test(c.moment))){
+        const si=cues.findIndex(c=>c.id==="signing"||/sign/i.test(c.moment));
+        cues.splice(si>=0?si+1:cues.length,0,fresh("congratulations"));
+      }
+    }
+    if(!(await kvGet("seeded-postlude-2"))){
+      const pl=cues.find(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment));
+      if(pl && !pl.tracks && (!pl.fileName || pl.src===SONGS["postlude"].src)){ Object.assign(pl,SET(["postlude-2","postlude"])); pl.loop=true; }
+    }
+    if(!(await kvGet("seeded-abhishek-2"))){
+      const ab=cues.find(c=>c.id==="abhishek-entrance"||/abhishek/i.test(c.moment));
+      if(ab && !ab.choices){
+        ab.choices=[{...SONGS["abhishek-entrance"]},{...SONGS["abhishek-entrance-2"]}];
+        ab.pick = ab.src===SONGS["abhishek-entrance"].src ? 0 : !ab.fileName ? 0 : -1;
+        if(!ab.fileName) Object.assign(ab,SONGS["abhishek-entrance"]);
+      }
+    }
+    if(!(await kvGet("seeded-bridesmaids"))){
+      const bm=cues.find(c=>c.id==="bridesmaids-entrance"||/bridesmaid/i.test(c.moment));
+      if(bm && !bm.fileName) Object.assign(bm,SONGS["bridesmaids-entrance"]);
+    }
+    save(); render();
+  }
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1);
+  ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
+});
+})();
+</script>
+<script>if('serviceWorker' in navigator && location.protocol!=='file:'){navigator.serviceWorker.register('sw.js').catch(()=>{});}</script>
+</body>
+</html>
