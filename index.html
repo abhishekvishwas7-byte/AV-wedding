@@ -274,11 +274,11 @@ const SONGS = {
   "guests-1": {song:"So Come Holy Spirit – part 1", src:"songs/guests-arriving-1.mp3", fileName:"So Come Holy Spirit part 1.mp3", duration:1141.3},
   "guests-2": {song:"So Come Holy Spirit – part 2", src:"songs/guests-arriving-2.mp3", fileName:"So Come Holy Spirit part 2.mp3", duration:1158.3},
   "guests-3": {song:"So Come Holy Spirit – part 3", src:"songs/guests-arriving-3.mp3", fileName:"So Come Holy Spirit part 3.mp3", duration:1154.5},
-  "abhishek-entrance": {song:"In Christ Alone – Instrumental Worship", src:"songs/abhishek-in-christ-alone.mp3", fileName:"In Christ Alone (Instrumental Worship).mp3", duration:202.7},
-  "abhishek-entrance-2": {song:"Sand Drawing – Judah Earl", src:"songs/abhishek-sand-drawing.mp3", fileName:"Sand Drawing – Judah Earl.mp3", duration:208.5},
-  "groomsmen-entrance": {song:"Gratitude – Instrumental Worship", src:"songs/groomsmen-gratitude.mp3", fileName:"Gratitude (Instrumental Worship).mp3", duration:291.5},
+  "abhishek-entrance": {song:"In Christ Alone – Instrumental Worship", src:"songs/abhishek-in-christ-alone.mp3", fileName:"In Christ Alone (Instrumental Worship).mp3", duration:202.5},
+  "abhishek-entrance-2": {song:"Sand Drawing – Judah Earl", src:"songs/abhishek-sand-drawing.mp3", fileName:"Sand Drawing – Judah Earl.mp3", duration:208.4},
+  "groomsmen-entrance": {song:"Gratitude – Instrumental Worship", src:"songs/groomsmen-gratitude.mp3", fileName:"Gratitude (Instrumental Worship).mp3", duration:291.4},
   "valerie-entrance": {song:"Goodness of God – Instrumental Worship", src:"songs/valerie-goodness-of-god.mp3", fileName:"Goodness of God (Instrumental Worship).mp3", duration:240.8},
-  "bridesmaids-entrance": {song:"The Blessing – Instrumental Worship", src:"songs/bridesmaids-the-blessing.mp3", fileName:"The Blessing (Instrumental, Piano & Pads).mp3", duration:250.1},
+  "bridesmaids-entrance": {song:"The Blessing – Instrumental Worship", src:"songs/bridesmaids-the-blessing.mp3", fileName:"The Blessing (Instrumental, Piano & Pads).mp3", duration:261.3},
   "postlude": {song:"Haazir (Live) – Bridge Music", src:"songs/postlude-haazir.mp3", fileName:"Haazir (Live) – Bridge Music.mp3", duration:409.5},
   "recessional": {song:"Gawahi (Live) – Bridge Music", src:"songs/recessional-gawahi.mp3", fileName:"Gawahi (Live) – Bridge Music.mp3", duration:285.5},
   "postlude-2": {song:"Washed – Elevation Rhythm", src:"songs/postlude-washed.mp3", fileName:"Washed – Elevation Rhythm.mp3", duration:240.5},
@@ -767,6 +767,8 @@ openDB().then(async db=>{
       const fi=cues.findIndex(c=>c.id==="first-dance"||/first dance/i.test(c.moment));
       cues.splice(fi>=0?fi:cues.length,0,fresh("reception-entry"));
     }
+    { const bySrc={}; Object.values(SONGS).forEach(o=>{ if(o.src&&!o.tracks) bySrc[o.src]=o.duration; });
+      cues.forEach(c=>{ if(bySrc[c.src]) c.duration=bySrc[c.src]; (c.choices||[]).concat(c.tracks||[]).forEach(o=>{ if(bySrc[o.src]) o.duration=bySrc[o.src]; }); if(c.tracks) c.duration=c.tracks.reduce((x,o)=>x+o.duration,0); }); }
     if(!(await kvGet("postlude-order-v2"))){
       const pl=cues.find(c=>c.id==="postlude"||/head out|postlude|leave/i.test(c.moment));
       if(pl && pl.tracks && pl.tracks.length===2 && pl.tracks[0].src===SONGS["postlude"].src && pl.tracks[1].src===SONGS["postlude-2"].src){
