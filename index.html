@@ -287,6 +287,7 @@ const SONGS = {
   "recessional": {song:"Gawahi (Live) – Bridge Music", src:"songs/recessional-gawahi.mp3", fileName:"Gawahi (Live) – Bridge Music.mp3", duration:285.5},
   "postlude-2": {song:"Washed – Elevation Rhythm", src:"songs/postlude-washed.mp3", fileName:"Washed – Elevation Rhythm.mp3", duration:240.5},
   "congratulations": {song:"Congratulations and Celebration", src:"songs/congratulations.mp3", fileName:"Congratulations and Celebration.mp3", duration:177.3},
+  "reception-0": {song:"Kaise Bataein", src:"songs/reception-kaise-bataein.mp3", fileName:"Kaise Bataein.mp3", duration:253.7},
   "reception-1": {song:"Deewana – Joseph Raj Allam ft. Akshay Mathews (Live)", src:"songs/reception-deewana.mp3", fileName:"Deewana (Live).mp3", duration:357.5},
   "reception-2": {song:"Naya Savera – Joseph Raj Allam, Joshua Andrews & Cameron Mendes", src:"songs/reception-naya-savera.mp3", fileName:"Naya Savera.mp3", duration:207.0},
   "first-dance": {song:"I Think They Call This Love – Elliot James Reay", src:"songs/first-dance.mp3", fileName:"I Think They Call This Love – Elliot James Reay.mp3", duration:135.0},
@@ -306,7 +307,7 @@ const DEFAULTS = [
   {id:"congratulations", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["congratulations"]},
   {id:"recessional", moment:"Recessional · just married", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["recessional"]},
   {id:"postlude", moment:"Guests head out", suggest:"Song name", fadeIn:3, fadeOut:8, loop:true, ...SET(["postlude-2","postlude"])},
-  {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-2","reception-1"]), song:"Naya Savera + Deewana"},
+  {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-0","reception-2","reception-1"]), song:"Kaise Bataein + Naya Savera + Deewana"},
   {id:"first-dance", section:"reception", moment:"First dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["first-dance"]},
 ];
 const $ = s => document.querySelector(s);
@@ -788,6 +789,14 @@ openDB().then(async db=>{
         re.tracks.reverse(); re.src=re.tracks[0].src; if(re.song==="Deewana + Naya Savera") re.song="Naya Savera + Deewana";
       }
     }
+    if(!(await kvGet("reception-kaise"))){
+      const re=cues.find(c=>c.id==="reception-entry");
+      if(re&&re.tracks&&!re.tracks.some(o=>o.src===SONGS["reception-0"].src)){
+        re.tracks.unshift({...SONGS["reception-0"]}); re.src=re.tracks[0].src;
+        re.duration=re.tracks.reduce((x,o)=>x+o.duration,0); re.fileName=`${re.tracks.length} songs, played in order`;
+        if(/^Naya Savera \+ Deewana$|^Deewana \+ Naya Savera$/.test(re.song)) re.song="Kaise Bataein + "+re.song;
+      }
+    }
     if(!(await kvGet("sections-v1"))){
       const fi=cues.findIndex(c=>c.id==="reception-entry"||/reception/i.test(c.moment));
       if(fi>=0) cues.forEach((c,k)=>{ if(k>=fi) c.section="reception"; });
@@ -824,7 +833,7 @@ openDB().then(async db=>{
     }
     save(); render();
   }
-  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1);
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1); kvSet("reception-kaise",1);
   ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
 });
 })();
