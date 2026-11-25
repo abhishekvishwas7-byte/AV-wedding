@@ -290,6 +290,7 @@ const SONGS = {
   "reception-0": {song:"Kaise Bataein", src:"songs/reception-kaise-bataein.mp3", fileName:"Kaise Bataein.mp3", duration:253.7},
   "reception-1": {song:"Deewana – Joseph Raj Allam ft. Akshay Mathews (Live)", src:"songs/reception-deewana.mp3", fileName:"Deewana (Live).mp3", duration:357.5},
   "reception-2": {song:"Naya Savera – Joseph Raj Allam, Joshua Andrews & Cameron Mendes", src:"songs/reception-naya-savera.mp3", fileName:"Naya Savera.mp3", duration:207.0},
+  "after-first-dance": {song:"Beautiful In White – Shane Filan", src:"songs/beautiful-in-white.mp3", fileName:"Beautiful In White – Shane Filan.mp3", duration:235.7},
   "first-dance": {song:"I Think They Call This Love – Elliot James Reay", src:"songs/first-dance.mp3", fileName:"I Think They Call This Love – Elliot James Reay.mp3", duration:135.0},
   "signing": {song:"Way Maker – Instrumental Worship", src:"songs/signing-way-maker.mp3", fileName:"Way Maker (Instrumental Worship).mp3", duration:234.2},
 };
@@ -310,6 +311,7 @@ const DEFAULTS = [
   {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-0","reception-2","reception-1"]), song:"Kaise Bataein + Naya Savera + Deewana"},
   {id:"congratulations-reception", section:"reception", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["congratulations"]},
   {id:"first-dance", section:"reception", moment:"First dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["first-dance"]},
+  {id:"after-first-dance", section:"reception", moment:"After the first dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["after-first-dance"]},
 ];
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,10);
@@ -802,6 +804,10 @@ openDB().then(async db=>{
       const fi=cues.findIndex(c=>c.id==="first-dance"||/first dance/i.test(c.moment));
       cues.splice(fi>=0?fi:cues.length,0,fresh("congratulations-reception"));
     }
+    if(!(await kvGet("seeded-after-first-dance")) && !cues.some(c=>c.id==="after-first-dance")){
+      const fi=cues.findIndex(c=>c.id==="first-dance"||/first dance/i.test(c.moment));
+      cues.splice(fi>=0?fi+1:cues.length,0,fresh("after-first-dance"));
+    }
     if(!(await kvGet("order-v5"))){
       const bi=cues.findIndex(c=>c.id==="bridesmaids-entrance"||/bridesmaid/i.test(c.moment));
       const ai=cues.findIndex(c=>c.id==="abhishek-entrance"||/abhishek/i.test(c.moment));
@@ -843,7 +849,7 @@ openDB().then(async db=>{
     }
     save(); render();
   }
-  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1); kvSet("reception-kaise",1); kvSet("order-v5",1); kvSet("congrats-reception",1);
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1); kvSet("reception-kaise",1); kvSet("order-v5",1); kvSet("congrats-reception",1); kvSet("seeded-after-first-dance",1);
   ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
 });
 })();
