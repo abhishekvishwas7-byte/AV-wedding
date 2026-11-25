@@ -102,6 +102,7 @@ ol.cues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;ga
 .cue.playing .num{color:var(--lime)}
 .txt{min-width:0;display:flex;flex-direction:column;gap:2px}
 .moment{border:0;background:transparent;padding:0;width:100%;font-family:var(--display);font-size:clamp(22px,2.4vw,28px);line-height:1.1;text-transform:uppercase;letter-spacing:.01em;text-overflow:ellipsis}
+.moment{display:block;resize:none;overflow:hidden;white-space:normal;overflow-wrap:anywhere;field-sizing:content;min-height:1.1em;color:inherit}
 .song{border:0;background:transparent;padding:0;width:100%;font-size:1rem;color:var(--w65);text-overflow:ellipsis}
 .song::placeholder{color:var(--w30)}
 .moment:focus,.song:focus{outline:none;box-shadow:0 2px 0 var(--lime)}
@@ -311,7 +312,7 @@ const DEFAULTS = [
   {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-0","reception-2","reception-1"]), song:"Kaise Bataein + Naya Savera + Deewana"},
   {id:"congratulations-reception", section:"reception", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["congratulations"]},
   {id:"first-dance", section:"reception", moment:"First dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["first-dance"]},
-  {id:"after-first-dance", section:"reception", moment:"After the first dance", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["after-first-dance"]},
+  {id:"after-first-dance", section:"reception", moment:"After the first dance, family & friends", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["after-first-dance"]},
 ];
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,10);
@@ -478,7 +479,7 @@ function render(){
         <button class="handle" id="h-${c.id}" aria-label="Move ${esc(c.moment)}. Hold Alt and press the arrow keys.">${GRIP}</button>
         <div class="num">${i+1}</div>
         <div class="txt">
-          <input class="moment" id="m-${c.id}" value="${esc(c.moment)}" aria-label="Moment name">
+          <textarea class="moment" id="m-${c.id}" rows="1" aria-label="Moment name">${esc(c.moment)}</textarea>
           <input class="song" id="s-${c.id}" value="${esc(c.song)}" placeholder="${esc(c.suggest||"Song name")}" aria-label="Song name">
           <div class="meta">
             ${c.fileName?`<span class="file" title="${esc(c.fileName)}">${esc(c.fileName)}</span>${c.duration?`<span class="dur">${fmt(c.duration)}</span>`:""}`:`<button class="tlink" data-act="file">Add a song</button>`}
@@ -505,6 +506,7 @@ function render(){
     </li>`;
   }).join("");
   if(fid){ const el=document.getElementById(fid); if(el){ el.focus({preventScroll:true}); try{ if(sel[0]!=null) el.setSelectionRange(sel[0],sel[1]); }catch(e){} } }
+  fitMoments();
   const loaded=cues.filter(c=>c.fileName),total=loaded.reduce((s,c)=>s+(c.duration||0),0);
   $("#stats").textContent=`${cues.length} moments · ${loaded.length} with songs${total?` · ${fmt(total)} of music`:""}`;
   updateDeck();
@@ -517,6 +519,9 @@ function setTitle(el,text){
   requestAnimationFrame(()=>{ const r=el.querySelector(".run"); if(r && r.offsetWidth>el.clientWidth+4 && !reduceMotion.matches){ const ti=el.querySelector(".track-in"); ti.innerHTML+=`<span class="run" aria-hidden="true">${esc(text)}</span>`; el.style.setProperty("--loop",r.offsetWidth+"px"); el.style.setProperty("--dur",(r.offsetWidth/60)+"s"); el.classList.add("scroll"); } });
 }
 
+function fitMoments(){ if(CSS.supports&&CSS.supports("field-sizing","content")) return;
+  document.querySelectorAll("textarea.moment").forEach(t=>{ t.style.height="auto"; t.style.height=t.scrollHeight+"px"; }); }
+addEventListener("resize",fitMoments);
 function updateDeck(){
   const on=live(),n=nextLoaded(),paused=on&&deck.el.paused,any=cues.some(c=>c.fileName);
   $("#fadeBtn").disabled=!on; $("#pauseBtn").disabled=!on;
@@ -653,7 +658,7 @@ $("#cues").addEventListener("keydown",e=>{
 const parseTime=v=>{ v=String(v).trim(); if(v.includes(":")){ const [m,s]=v.split(":"); return (+m||0)*60+(+s||0);} return +v||0; };
 $("#cues").addEventListener("input",e=>{
   const t=e.target,c=cueOf(t); if(!c) return;
-  if(t.classList.contains("moment")) c.moment=t.value;
+  if(t.classList.contains("moment")){ c.moment=t.value.replace(/\n/g," "); if(!(CSS.supports&&CSS.supports("field-sizing","content"))){ t.style.height="auto"; t.style.height=t.scrollHeight+"px"; } }
   else if(t.classList.contains("song")) c.song=t.value;
   else if(t.dataset.k==="loop") c.loop=t.checked;
   else if(t.dataset.k==="fadeIn"||t.dataset.k==="fadeOut") c[t.dataset.k]=Math.max(0,+t.value||0);
@@ -703,7 +708,7 @@ $("#testBtn").addEventListener("click",()=>{
 });
 document.addEventListener("keydown",e=>{
   const tag=e.target.tagName;
-  if(tag==="INPUT"){ if(e.key==="Escape"||(e.key==="Enter"&&e.target.type!=="checkbox")) e.target.blur(); return; }
+  if(tag==="INPUT"||tag==="TEXTAREA"){ if(e.key==="Escape"||(e.key==="Enter"&&e.target.type!=="checkbox")){ e.preventDefault(); e.target.blur(); } return; }
   if(e.code==="Space"&&!(tag==="BUTTON"&&e.target.id!=="goBtn")&&e.target.id!=="track"){ e.preventDefault(); ensureCtx(); go(); }
   if(e.key==="Escape") fadeNow();
 });
@@ -808,6 +813,9 @@ openDB().then(async db=>{
       const fi=cues.findIndex(c=>c.id==="first-dance"||/first dance/i.test(c.moment));
       cues.splice(fi>=0?fi+1:cues.length,0,fresh("after-first-dance"));
     }
+    if(!(await kvGet("rename-after-first-dance"))){
+      cues.forEach(c=>{ if(c.id==="after-first-dance"&&c.moment==="After the first dance") c.moment="After the first dance, family & friends"; });
+    }
     if(!(await kvGet("order-v5"))){
       const bi=cues.findIndex(c=>c.id==="bridesmaids-entrance"||/bridesmaid/i.test(c.moment));
       const ai=cues.findIndex(c=>c.id==="abhishek-entrance"||/abhishek/i.test(c.moment));
@@ -849,7 +857,7 @@ openDB().then(async db=>{
     }
     save(); render();
   }
-  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1); kvSet("reception-kaise",1); kvSet("order-v5",1); kvSet("congrats-reception",1); kvSet("seeded-after-first-dance",1);
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1); kvSet("reception-kaise",1); kvSet("order-v5",1); kvSet("congrats-reception",1); kvSet("seeded-after-first-dance",1); kvSet("rename-after-first-dance",1);
   ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
 });
 })();
