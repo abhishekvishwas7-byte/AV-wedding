@@ -307,7 +307,7 @@ const DEFAULTS = [
   {id:"bridesmaids-entrance", moment:"Bridesmaids walk in", suggest:"Song name", fadeIn:2, fadeOut:5, ...SONGS["bridesmaids-entrance"]},
   {id:"valerie-entrance", moment:"Valerie walks in", suggest:"Song name", fadeIn:1, fadeOut:6, ...SONGS["valerie-entrance"]},
   {id:"signing", moment:"Signing the register", suggest:"Song name", fadeIn:2, fadeOut:5, loop:true, ...SONGS["signing"]},
-  {id:"congratulations", moment:"Congratulations", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["ceremony-7"]},
+  {id:"congratulations", moment:"Showers of Blessings", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["ceremony-7"]},
   {id:"recessional", moment:"Recessional · just married", suggest:"Song name", fadeIn:0, fadeOut:4, ...SONGS["recessional"]},
   {id:"postlude", moment:"Guests head out", suggest:"Song name", fadeIn:3, fadeOut:8, loop:true, ...SET(["postlude-2","postlude"])},
   {id:"reception-entry", section:"reception", moment:"Reception entry", suggest:"Song name", fadeIn:0, fadeOut:4, ...SET(["reception-0","reception-2","reception-1"]), song:"Kaise Bataein + Naya Savera + Deewana"},
@@ -822,6 +822,9 @@ openDB().then(async db=>{
       if(c7&&(!c7.fileName||c7.src===SONGS["congratulations"].src)) Object.assign(c7,SONGS["ceremony-7"]);
     }
     cues.forEach(c=>{ if(c.src===SONGS["ceremony-7"].src&&c.song==="There – Gaither"){ c.song=SONGS["ceremony-7"].song; c.fileName=SONGS["ceremony-7"].fileName; } });
+    if(!(await kvGet("rename-moment-7"))){
+      cues.forEach(c=>{ if(c.id==="congratulations"&&c.moment==="Congratulations") c.moment="Showers of Blessings"; });
+    }
     if(!(await kvGet("order-v5"))){
       const bi=cues.findIndex(c=>c.id==="bridesmaids-entrance"||/bridesmaid/i.test(c.moment));
       const ai=cues.findIndex(c=>c.id==="abhishek-entrance"||/abhishek/i.test(c.moment));
@@ -863,7 +866,7 @@ openDB().then(async db=>{
     }
     save(); render();
   }
-  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1); kvSet("reception-kaise",1); kvSet("order-v5",1); kvSet("congrats-reception",1); kvSet("seeded-after-first-dance",1); kvSet("rename-after-first-dance",1); kvSet("ceremony-7-gaither",1);
+  kvSet("order-v2",1); kvSet("seeded-bridesmaids",1); kvSet("seeded-postlude",1); kvSet("seeded-abhishek-2",1); kvSet("seeded-recessional",1); kvSet("seeded-postlude-2",1); kvSet("order-v3",1); kvSet("postlude-order-v2",1); kvSet("seeded-first-dance",1); kvSet("seeded-reception",1); kvSet("sections-v1",1); kvSet("reception-order-v2",1); kvSet("reception-kaise",1); kvSet("order-v5",1); kvSet("congrats-reception",1); kvSet("seeded-after-first-dance",1); kvSet("rename-after-first-dance",1); kvSet("ceremony-7-gaither",1); kvSet("rename-moment-7",1);
   ["seeded-abhishek","seeded-guests-arrive","seeded-groomsmen","seeded-valerie","seeded-signing"].forEach(k=>kvSet(k,1));
 });
 })();
