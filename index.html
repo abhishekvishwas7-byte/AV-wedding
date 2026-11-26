@@ -287,7 +287,7 @@ const SONGS = {
   "postlude": {song:"Haazir (Live) – Bridge Music", src:"songs/postlude-haazir.mp3", fileName:"Haazir (Live) – Bridge Music.mp3", duration:409.5},
   "recessional": {song:"Gawahi (Live) – Bridge Music", src:"songs/recessional-gawahi.mp3", fileName:"Gawahi (Live) – Bridge Music.mp3", duration:285.5},
   "postlude-2": {song:"Washed – Elevation Rhythm", src:"songs/postlude-washed.mp3", fileName:"Washed – Elevation Rhythm.mp3", duration:240.5},
-  "ceremony-7": {song:"There – Gaither", src:"songs/gaither-there.m4a", fileName:"Gaither – There.m4a", duration:147.1},
+  "ceremony-7": {song:"Showers of Blessings – Gaither", src:"songs/gaither-there.m4a", fileName:"Showers of Blessings – Gaither.m4a", duration:147.1},
   "congratulations": {song:"Congratulations and Celebration", src:"songs/congratulations.mp3", fileName:"Congratulations and Celebration.mp3", duration:177.3},
   "reception-0": {song:"Kaise Bataein", src:"songs/reception-kaise-bataein.mp3", fileName:"Kaise Bataein.mp3", duration:253.7},
   "reception-1": {song:"Deewana – Joseph Raj Allam ft. Akshay Mathews (Live)", src:"songs/reception-deewana.mp3", fileName:"Deewana (Live).mp3", duration:357.5},
@@ -821,6 +821,7 @@ openDB().then(async db=>{
       const c7=cues.find(c=>c.id==="congratulations");
       if(c7&&(!c7.fileName||c7.src===SONGS["congratulations"].src)) Object.assign(c7,SONGS["ceremony-7"]);
     }
+    cues.forEach(c=>{ if(c.src===SONGS["ceremony-7"].src&&c.song==="There – Gaither"){ c.song=SONGS["ceremony-7"].song; c.fileName=SONGS["ceremony-7"].fileName; } });
     if(!(await kvGet("order-v5"))){
       const bi=cues.findIndex(c=>c.id==="bridesmaids-entrance"||/bridesmaid/i.test(c.moment));
       const ai=cues.findIndex(c=>c.id==="abhishek-entrance"||/abhishek/i.test(c.moment));
